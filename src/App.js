@@ -1,7 +1,7 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom'; // ✅ No BrowserRouter here
 import Header from './components-mgi/Header';
-import TradingJournalForm from './components-mgi/TradingJournalForm';
+import TradingJournalForm from './components-mgi/TradeJournal/TradingJournalForm';
 import Strategy from './components-mgi/Strategy';
 
 function App() {
