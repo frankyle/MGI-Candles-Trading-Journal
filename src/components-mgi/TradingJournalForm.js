@@ -11,10 +11,12 @@ const TradingJournalForm = () => {
     setupImage: '',
     entryImage: '',
     profitImage: '',
+    tradersIdeaImage: '', // New field
   });
 
   const [journal, setJournal] = useState([]);
   const [editIndex, setEditIndex] = useState(null);
+  const [visibleIdeas, setVisibleIdeas] = useState({}); // Toggle state
 
   useEffect(() => {
     const saved = JSON.parse(localStorage.getItem('tradingJournal')) || [];
@@ -79,6 +81,13 @@ const TradingJournalForm = () => {
     resetForm();
   };
 
+  const toggleIdeaVisibility = (index) => {
+    setVisibleIdeas((prev) => ({
+      ...prev,
+      [index]: !prev[index],
+    }));
+  };
+
   const resetForm = () => {
     setForm({
       pair: '',
@@ -90,6 +99,7 @@ const TradingJournalForm = () => {
       setupImage: '',
       entryImage: '',
       profitImage: '',
+      tradersIdeaImage: '',
     });
     setEditIndex(null);
   };
@@ -180,13 +190,17 @@ const TradingJournalForm = () => {
           </div>
         </div>
 
-        <div className="grid sm:grid-cols-3 gap-4">
-          {['setupImage', 'entryImage', 'profitImage'].map((imgType) => (
+        <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-4">
+          {['setupImage', 'entryImage', 'profitImage', 'tradersIdeaImage'].map((imgType) => (
             <div key={imgType}>
               <label className="block text-gray-700 mb-1 capitalize">
                 {imgType.replace('Image', '').replace(/([A-Z])/g, ' $1')} Image
               </label>
-              <input type="file" accept="image/*" onChange={(e) => handleImage(e, imgType)} />
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => handleImage(e, imgType)}
+              />
             </div>
           ))}
         </div>
@@ -232,6 +246,29 @@ const TradingJournalForm = () => {
                 </div>
               )}
             </div>
+
+            {/* Trader's Idea Show/Hide */}
+            {entry.tradersIdeaImage && (
+              <div className="mt-4">
+                <button
+                  onClick={() => toggleIdeaVisibility(index)}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 mb-2"
+                >
+                  {visibleIdeas[index] ? 'Hide Trader\'s Idea' : 'Show Trader\'s Idea'}
+                </button>
+
+                {visibleIdeas[index] && (
+                  <div>
+                    <p className="text-sm text-gray-600 mb-1 font-semibold">Trader's Idea</p>
+                    <img
+                      src={entry.tradersIdeaImage}
+                      alt="Trader's Idea"
+                      className="w-full rounded-md border"
+                    />
+                  </div>
+                )}
+              </div>
+            )}
 
             <div className="mt-6 flex flex-wrap gap-3">
               <button

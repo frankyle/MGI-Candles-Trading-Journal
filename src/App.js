@@ -1,11 +1,19 @@
 import React from 'react';
+import { Routes, Route } from 'react-router-dom'; // ✅ No BrowserRouter here
+import Header from './components-mgi/Header';
 import TradingJournalForm from './components-mgi/TradingJournalForm';
+import Strategy from './components-mgi/Strategy';
 
 function App() {
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
-      <h1 className="text-3xl font-bold text-center mb-8 text-green-500">MGI Candles Trading Journal</h1>
-      <TradingJournalForm />
+    <div className="bg-gray-100 min-h-screen pt-20">
+      <Header />
+      <div className="max-w-5xl mx-auto px-4">
+        <Routes>
+          <Route path="/" element={<TradingJournalForm />} />
+          <Route path="/strategy" element={<Strategy />} />
+        </Routes>
+      </div>
     </div>
   );
 }
