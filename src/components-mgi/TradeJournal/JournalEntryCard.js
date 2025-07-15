@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
+// Format date for readability
 const formatDate = (dateStr) => {
   if (!dateStr) return '';
   const date = new Date(dateStr);
@@ -11,7 +12,7 @@ const formatDate = (dateStr) => {
   });
 };
 
-// ✅ Updated checklist with strategy-specific questions
+// Checklist items
 const defaultChecklistItems = {
   fourHourTrend: 'Is the 4H trend in your direction?',
   fibZone: 'Are you in the Fib Discount Zone?',
@@ -24,6 +25,7 @@ const defaultChecklistItems = {
   utAlert: 'Is there a UT Alert signal in No Wicks chart?',
 };
 
+// Main component
 const JournalEntryCard = ({
   entry,
   index,
@@ -33,7 +35,6 @@ const JournalEntryCard = ({
   toggleIdeaVisibility,
 }) => {
   const checklistKey = `checklist-${index}`;
-
   const [visibleChecklist, setVisibleChecklist] = useState(false);
   const [checklist, setChecklist] = useState(() => {
     const saved = localStorage.getItem(checklistKey);
@@ -60,6 +61,7 @@ const JournalEntryCard = ({
 
   return (
     <div className="border p-5 rounded-xl mb-6 bg-white shadow-md">
+      {/* Basic info */}
       <div className="grid sm:grid-cols-2 gap-4 mb-4">
         <p><strong>Pair:</strong> {entry.pair}</p>
         <p><strong>Type:</strong> {entry.type}</p>
@@ -69,12 +71,14 @@ const JournalEntryCard = ({
         <p className="sm:col-span-2"><strong>Emotions:</strong> {entry.emotions.join(', ') || 'None'}</p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4">
+      {/* Scrollable image row */}
+      <div className="flex overflow-x-auto space-x-4 mt-4 pb-2">
         {entry.setupImage && <ImageCard label="Setup" src={entry.setupImage} />}
         {entry.entryImage && <ImageCard label="Entry" src={entry.entryImage} />}
         {entry.profitImage && <ImageCard label="Profit" src={entry.profitImage} />}
       </div>
 
+      {/* Trader's Idea */}
       {entry.tradersIdeaImage && (
         <div className="mt-4">
           <button
@@ -92,7 +96,7 @@ const JournalEntryCard = ({
         </div>
       )}
 
-      {/* ✅ Checklist Toggle */}
+      {/* Checklist Toggle */}
       <div className="mt-4">
         <button
           onClick={toggleChecklistVisibility}
@@ -120,16 +124,28 @@ const JournalEntryCard = ({
         )}
       </div>
 
+      {/* Buttons */}
       <div className="mt-6 flex flex-wrap gap-3">
-        <button onClick={() => onEdit(index)} className="px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600">Edit</button>
-        <button onClick={() => onDelete(index)} className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">Delete</button>
+        <button
+          onClick={() => onEdit(index)}
+          className="px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600"
+        >
+          Edit
+        </button>
+        <button
+          onClick={() => onDelete(index)}
+          className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+        >
+          Delete
+        </button>
       </div>
     </div>
   );
 };
 
+// ✅ Reusable image card
 const ImageCard = ({ label, src }) => (
-  <div>
+  <div className="min-w-[200px] max-w-xs flex-shrink-0">
     <p className="text-sm text-gray-600 mb-1 font-semibold">{label} Image</p>
     <img src={src} alt={label} className="w-full rounded-md border" />
   </div>
