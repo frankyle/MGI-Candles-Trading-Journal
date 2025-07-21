@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import JournalEntryCard from './JournalEntryCard';
 
 const JournalEntryList = ({ journal, onEdit, onDelete, visibleIdeas, toggleIdeaVisibility }) => {
-  const [sortOption, setSortOption] = useState('date-desc');
+  const [sortOption, setSortOption] = useState('date-desc'); // default: newest first
 
   const sortedJournal = useMemo(() => {
     const entries = [...journal];
@@ -23,16 +23,14 @@ const JournalEntryList = ({ journal, onEdit, onDelete, visibleIdeas, toggleIdeaV
 
   return (
     <div className="mt-10">
-      {/* Heading and Sort Dropdown in one row */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 px-2">
-        <h3 className="text-xl font-bold text-gray-800 text-center sm:text-left mb-2 sm:mb-0">
-          Journal Entries
-        </h3>
+      <h3 className="text-xl font-bold text-gray-800 mb-4 text-center">Journal Entries</h3>
 
+      {/* Sort Dropdown */}
+      <div className="flex justify-center mb-6">
         <select
           value={sortOption}
           onChange={(e) => setSortOption(e.target.value)}
-          className="border border-gray-300 rounded-md p-2 w-full sm:w-auto"
+          className="border border-gray-300 rounded-md p-2"
         >
           <option value="date-desc">Sort by Date (Newest)</option>
           <option value="date-asc">Sort by Date (Oldest)</option>
