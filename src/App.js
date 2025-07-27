@@ -2,7 +2,8 @@ import React from 'react';
 import { Routes, Route } from 'react-router-dom'; // ✅ No BrowserRouter here
 import Header from './components-mgi/Header';
 import TradingJournalForm from './components-mgi/TradeJournal/TradingJournalForm';
-import Strategy from './components-mgi/Strategy';
+import RiskManagement from './components-mgi/RiskManagement/RiskManagement';
+import ProgressiveGraphs from './components-mgi/RiskManagement/ProgressiveGraphs';
 
 function App() {
   return (
@@ -11,7 +12,8 @@ function App() {
       <div className="max-w-5xl mx-auto px-4">
         <Routes>
           <Route path="/" element={<TradingJournalForm />} />
-          <Route path="/strategy" element={<Strategy />} />
+          <Route path="/riskmanagement" element={<RiskManagement />} />
+          <Route path="/graphs" element={<ProgressiveGraphs />} />
         </Routes>
       </div>
     </div>

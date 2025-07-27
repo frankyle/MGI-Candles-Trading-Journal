@@ -1,23 +1,25 @@
 import React, { useState, useMemo } from 'react';
 import JournalEntryCard from './JournalEntryCard';
 
-const JournalEntryList = ({ journal, onEdit, onDelete, visibleIdeas, toggleIdeaVisibility }) => {
-  const [sortOption, setSortOption] = useState('date-desc'); // default: newest first
+const JournalEntryList = ({ journal, onEdit, onDelete }) => {
+  const [sortOption, setSortOption] = useState('date-desc');
+  
+  // ✅ State to manage Trader's Idea visibility per entry
+  const [visibleIdeas, setVisibleIdeas] = useState({});
+
+  const toggleIdeaVisibility = (index) => {
+    setVisibleIdeas((prev) => ({
+      ...prev,
+      [index]: !prev[index],
+    }));
+  };
 
   const sortedJournal = useMemo(() => {
     const entries = [...journal];
-    if (sortOption === 'pair-asc') {
-      return entries.sort((a, b) => a.pair.localeCompare(b.pair));
-    }
-    if (sortOption === 'pair-desc') {
-      return entries.sort((a, b) => b.pair.localeCompare(a.pair));
-    }
-    if (sortOption === 'date-asc') {
-      return entries.sort((a, b) => new Date(a.date) - new Date(b.date));
-    }
-    if (sortOption === 'date-desc') {
-      return entries.sort((a, b) => new Date(b.date) - new Date(a.date));
-    }
+    if (sortOption === 'pair-asc') return entries.sort((a, b) => a.pair.localeCompare(b.pair));
+    if (sortOption === 'pair-desc') return entries.sort((a, b) => b.pair.localeCompare(a.pair));
+    if (sortOption === 'date-asc') return entries.sort((a, b) => new Date(a.date) - new Date(b.date));
+    if (sortOption === 'date-desc') return entries.sort((a, b) => new Date(b.date) - new Date(a.date));
     return entries;
   }, [journal, sortOption]);
 
@@ -39,17 +41,21 @@ const JournalEntryList = ({ journal, onEdit, onDelete, visibleIdeas, toggleIdeaV
         </select>
       </div>
 
-      {sortedJournal.map((entry, index) => (
-        <JournalEntryCard
-          key={index}
-          entry={entry}
-          index={index}
-          onEdit={onEdit}
-          onDelete={onDelete}
-          visibleIdeas={visibleIdeas}
-          toggleIdeaVisibility={toggleIdeaVisibility}
-        />
-      ))}
+      {sortedJournal.length === 0 ? (
+        <p className="text-gray-500 text-center">No journal entries yet.</p>
+      ) : (
+        sortedJournal.map((entry, index) => (
+          <JournalEntryCard
+            key={index}
+            entry={entry}
+            index={index}
+            onEdit={onEdit}
+            onDelete={onDelete}
+            visibleIdeas={visibleIdeas}
+            toggleIdeaVisibility={toggleIdeaVisibility}
+          />
+        ))
+      )}
     </div>
   );
 };
