@@ -12,12 +12,14 @@ const formatDate = (dateStr) => {
   });
 };
 
-// Checklist items
+// Checklist items (kept for context, not modified here)
 const defaultChecklistItems = {
   fourHourTrend: 'Is the 4H trend in your direction?',
   fibZone: 'Are you in the Fib Discount Zone?',
   ictBox: 'Is the FVG Forming/Broken?',
-  bos: 'Is there a Break of Structure in 15min(BoS)?',
+  majorZones: 'How many PDL/PDH, Weekly Open, PWH/PWL, Daily Open?',
+  newyork: 'PDL/PDH Newyork was not broken by Asian?',
+  bos: 'Is there a Break of Structure in 15min (BoS)?',
   orderBlock: 'Do you see a 30min/1hr Order Block?',
   dailyMovement: 'Does it align with the Daily Movement direction?',
   amd: 'Is there a clear Accumulation-Manipulation-Distribution (AMD) pattern?',
@@ -25,7 +27,18 @@ const defaultChecklistItems = {
   utAlert: 'Is there a UT Alert signal in No Wicks chart?',
 };
 
-// Main component
+// Function to determine probability, risk, and color
+const getProbabilityRiskColor = (completed, total) => {
+  if (completed >= total) {
+    return { probability: 'High Probability', risk: '3%', color: 'text-green-600' };
+  } else if (completed >= 9) {
+    return { probability: 'Medium Probability', risk: '2%', color: 'text-yellow-500' };
+  } else if (completed >= 6) {
+    return { probability: 'Low Probability', risk: '1%', color: 'text-orange-500' };
+  }
+  return { probability: 'Very Low Probability', risk: '0.5%', color: 'text-red-600' };
+};
+
 const JournalEntryCard = ({
   entry,
   index,
@@ -36,9 +49,18 @@ const JournalEntryCard = ({
 }) => {
   const checklistKey = `checklist-${index}`;
   const [visibleChecklist, setVisibleChecklist] = useState(false);
+
+  // ✅ NEW: State to toggle Trader Idea section
+  const [showTraderIdeas, setShowTraderIdeas] = useState(false);
+
   const [checklist, setChecklist] = useState(() => {
     const saved = localStorage.getItem(checklistKey);
-    return saved ? JSON.parse(saved) : {};
+    const parsed = saved ? JSON.parse(saved) : {};
+    const fullChecklist = {};
+    for (const key of Object.keys(defaultChecklistItems)) {
+      fullChecklist[key] = parsed[key] || false;
+    }
+    return fullChecklist;
   });
 
   useEffect(() => {
@@ -56,8 +78,14 @@ const JournalEntryCard = ({
     setVisibleChecklist((prev) => !prev);
   };
 
+  // ✅ Toggle Trader Idea images
+  const toggleTraderIdeas = () => {
+    setShowTraderIdeas((prev) => !prev);
+  };
+
   const completed = Object.values(checklist).filter(Boolean).length;
   const total = Object.keys(defaultChecklistItems).length;
+  const { probability, risk, color } = getProbabilityRiskColor(completed, total);
 
   return (
     <div className="border p-5 rounded-xl mb-6 bg-white shadow-md">
@@ -71,32 +99,31 @@ const JournalEntryCard = ({
         <p className="sm:col-span-2"><strong>Emotions:</strong> {entry.emotions.join(', ') || 'None'}</p>
       </div>
 
-      {/* Scrollable image row */}
+      {/* Setup, Entry, Profit images */}
       <div className="flex overflow-x-auto space-x-4 mt-4 pb-2">
         {entry.setupImage && <ImageCard label="Setup" src={entry.setupImage} />}
         {entry.entryImage && <ImageCard label="Entry" src={entry.entryImage} />}
         {entry.profitImage && <ImageCard label="Profit" src={entry.profitImage} />}
       </div>
 
-      {/* Trader's Idea */}
-      {entry.tradersIdeaImage && (
-        <div className="mt-4">
-          <button
-            onClick={() => toggleIdeaVisibility(index)}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 mb-2"
-          >
-            {visibleIdeas[index] ? 'Hide Trader\'s Idea' : 'Show Trader\'s Idea'}
-          </button>
-          {visibleIdeas[index] && (
-            <div>
-              <p className="text-sm text-gray-600 mb-1 font-semibold">Trader's Idea</p>
-              <img src={entry.tradersIdeaImage} alt="Trader's Idea" className="w-full rounded-md border" />
-            </div>
-          )}
+      {/* ✅ Button to toggle Trader Idea images */}
+      <button
+        onClick={toggleTraderIdeas}
+        className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+      >
+        {showTraderIdeas ? 'Hide Traders Idea' : 'Show Traders Idea'}
+      </button>
+
+      {/* ✅ Conditionally render Trader Idea images */}
+      {showTraderIdeas && (
+        <div className="flex overflow-x-auto space-x-4 mt-4 pb-2">
+          {entry.traderIdeaMorning && <ImageCard label="Trader Idea Morning" src={entry.traderIdeaMorning} />}
+          {entry.traderIdeaNoon && <ImageCard label="Trader Idea Noon" src={entry.traderIdeaNoon} />}
+          {entry.traderIdeaEvening && <ImageCard label="Trader Idea Evening" src={entry.traderIdeaEvening} />}
         </div>
       )}
 
-      {/* Checklist Toggle */}
+      {/* Checklist */}
       <div className="mt-4">
         <button
           onClick={toggleChecklistVisibility}
@@ -108,9 +135,18 @@ const JournalEntryCard = ({
         {visibleChecklist && (
           <div className="bg-gray-50 border rounded-md p-4 mt-2">
             <p className="font-semibold text-gray-700 mb-1">Trade Checklist</p>
-            <p className="text-sm text-gray-500 mb-3">Progress: {completed}/{total} completed</p>
+            <p className="text-sm text-gray-500 mb-2">
+              Progress: {completed}/{total} completed
+            </p>
+            <p className={`text-sm font-bold mb-3 ${color}`}>
+              {probability} → Recommended Risk: {risk}
+            </p>
+
             {Object.entries(defaultChecklistItems).map(([key, label]) => (
-              <label key={key} className="flex items-center space-x-2 mb-2 text-sm text-gray-800">
+              <label
+                key={key}
+                className="flex items-center space-x-2 mb-2 text-sm text-gray-800"
+              >
                 <input
                   type="checkbox"
                   checked={!!checklist[key]}
@@ -143,7 +179,7 @@ const JournalEntryCard = ({
   );
 };
 
-// ✅ Reusable image card
+// Reusable Image Card component
 const ImageCard = ({ label, src }) => (
   <div className="min-w-[200px] max-w-xs flex-shrink-0">
     <p className="text-sm text-gray-600 mb-1 font-semibold">{label} Image</p>

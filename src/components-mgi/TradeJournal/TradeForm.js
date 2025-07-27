@@ -2,7 +2,6 @@ import React from 'react';
 import ImageUploadField from './ImageUploadField';
 import EmotionSelector from './EmotionSelector';
 
-const emotionOptions = ['Confident', 'Fearful', 'Revengeful', 'Calm', 'Anxious'];
 
 const TradeForm = ({ form, onChange, onSubmit, onImageChange, onEmotionToggle, editIndex }) => {
   return (
@@ -53,20 +52,24 @@ const TradeForm = ({ form, onChange, onSubmit, onImageChange, onEmotionToggle, e
           className="w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400"
         />
         {form.session && (
-          <p className="text-sm text-green-600 mt-1">Session: <strong>{form.session}</strong></p>
+          <p className="text-sm text-green-600 mt-1">
+            Session: <strong>{form.session}</strong>
+          </p>
         )}
       </div>
 
       <EmotionSelector emotions={form.emotions} onToggle={onEmotionToggle} />
 
+      {/* ✅ Image Upload Fields */}
       <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-4">
-        {['setupImage', 'entryImage', 'profitImage', 'tradersIdeaImage'].map((type) => (
-          <ImageUploadField
-            key={type}
-            label={type}
-            onChange={(e) => onImageChange(e, type)}
-          />
-        ))}
+        <ImageUploadField label="Setup" onChange={(e) => onImageChange(e, 'setupImage')} />
+        <ImageUploadField label="Entry" onChange={(e) => onImageChange(e, 'entryImage')} />
+        <ImageUploadField label="Profit" onChange={(e) => onImageChange(e, 'profitImage')} />
+
+        {/* ✅ Replace single tradersIdeaImage with three */}
+        <ImageUploadField label="Trader Idea 05:00–08:00" onChange={(e) => onImageChange(e, 'traderIdeaMorning')} />
+        <ImageUploadField label="Trader Idea 12:00–14:00" onChange={(e) => onImageChange(e, 'traderIdeaNoon')} />
+        <ImageUploadField label="Trader Idea 16:00–18:00" onChange={(e) => onImageChange(e, 'traderIdeaEvening')} />
       </div>
 
       <button

@@ -13,7 +13,9 @@ const TradingJournalForm = () => {
     setupImage: '',
     entryImage: '',
     profitImage: '',
-    tradersIdeaImage: '',
+    traderIdeaMorning: '',
+    traderIdeaNoon: '',
+    traderIdeaEvening: '',
   });
 
   const [journal, setJournal] = useState([]);
@@ -101,7 +103,9 @@ const TradingJournalForm = () => {
       setupImage: '',
       entryImage: '',
       profitImage: '',
-      tradersIdeaImage: '',
+      traderIdeaMorning: '',
+      traderIdeaNoon: '',
+      traderIdeaEvening: '',
     });
     setEditIndex(null);
   };
