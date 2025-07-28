@@ -22,7 +22,8 @@ const Header = () => {
         {/* Desktop Nav */}
         <nav className="hidden md:flex space-x-6 items-center">
           <Link to="/" className="text-gray-700 hover:text-indigo-600 font-medium transition">Trades</Link>
-          <Link to="/riskmanagement" onClick={() => setMobileMenuOpen(false)} className="block text-gray-700 font-medium hover:text-indigo-600">Risk Management</Link>
+          <Link to="/riskmanagement" onClick={() => setMobileMenuOpen(false)} className="block text-gray-700 font-medium hover:text-indigo-600">Risk Management (Personal)</Link>
+          <Link to="/riskmanagementfunded" onClick={() => setMobileMenuOpen(false)} className="block text-gray-700 font-medium hover:text-indigo-600">Risk Management (Funded)</Link>
           <Link to="/graphs" onClick={() => setMobileMenuOpen(false)} className="block text-gray-700 font-medium hover:text-indigo-600"> Progress Graphs</Link>
      
           {!isLoggedIn ? (

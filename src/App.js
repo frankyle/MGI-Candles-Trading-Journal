@@ -4,6 +4,7 @@ import Header from './components-mgi/Header';
 import TradingJournalForm from './components-mgi/TradeJournal/TradingJournalForm';
 import RiskManagement from './components-mgi/RiskManagement/RiskManagement';
 import ProgressiveGraphs from './components-mgi/RiskManagement/ProgressiveGraphs';
+import FundedAccount from './components-mgi/FundedAccount/FundedAccount';
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
         <Routes>
           <Route path="/" element={<TradingJournalForm />} />
           <Route path="/riskmanagement" element={<RiskManagement />} />
+          <Route path="/riskmanagementfunded" element={<FundedAccount />} />
           <Route path="/graphs" element={<ProgressiveGraphs />} />
         </Routes>
       </div>

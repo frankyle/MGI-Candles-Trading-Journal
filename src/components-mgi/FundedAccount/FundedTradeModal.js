@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 
-const accountBalanceUSD = 100;
+const accountBalanceUSD = 10000;
 const usdToTshRate = 2500;
 const convertUSDToTSH = (usd) => usd * usdToTshRate;
 
-function RiskTradeModal({ onClose, onSave, initialData }) {
+function FundedTradeModal({ onClose, onSave, initialData }) {
   const [form, setForm] = useState({
     date: '',
     pair: '',
@@ -198,4 +198,4 @@ function RiskTradeModal({ onClose, onSave, initialData }) {
   );
 }
 
-export default RiskTradeModal;
+export default FundedTradeModal;
