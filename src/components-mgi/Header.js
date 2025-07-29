@@ -55,10 +55,10 @@ const Header = () => {
       {mobileMenuOpen && (
         <div className="md:hidden bg-white px-4 pb-4 space-y-3 shadow-md">
           <Link to="/" onClick={() => setMobileMenuOpen(false)} className="block text-gray-700 font-medium hover:text-indigo-600">Trades</Link>
-          <Link to="/riskmanagement" onClick={() => setMobileMenuOpen(false)} className="block text-gray-700 font-medium hover:text-indigo-600">Risk Management</Link>
+          <Link to="/riskmanagement" onClick={() => setMobileMenuOpen(false)} className="block text-gray-700 font-medium hover:text-indigo-600">Risk Management (Personal)</Link>
+          <Link to="/riskmanagementfunded" onClick={() => setMobileMenuOpen(false)} className="block text-gray-700 font-medium hover:text-indigo-600">Risk Management (Funded)</Link>
           <Link to="/graphs" onClick={() => setMobileMenuOpen(false)} className="block text-gray-700 font-medium hover:text-indigo-600"> Progress Graphs</Link>
-          <Link to="/strategy" onClick={() => setMobileMenuOpen(false)} className="block text-gray-700 font-medium hover:text-indigo-600">Strategy</Link>
-
+     
           {!isLoggedIn ? (
             <>
               <button className="w-full bg-indigo-600 text-white px-4 py-2 rounded-full font-medium hover:bg-indigo-700">
