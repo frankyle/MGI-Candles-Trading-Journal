@@ -12,7 +12,7 @@ const formatDate = (dateStr) => {
   });
 };
 
-// Checklist items (kept for context, not modified here)
+// Checklist items
 const defaultChecklistItems = {
   fourHourTrend: 'Is the 4H trend in your direction?',
   fibZone: 'Are you in the Fib Discount Zone?',
@@ -27,7 +27,7 @@ const defaultChecklistItems = {
   utAlert: 'Is there a UT Alert signal in No Wicks chart?',
 };
 
-// Function to determine probability, risk, and color
+// Probability calculation
 const getProbabilityRiskColor = (completed, total) => {
   if (completed >= total) {
     return { probability: 'High Probability', risk: '3%', color: 'text-green-600' };
@@ -49,8 +49,6 @@ const JournalEntryCard = ({
 }) => {
   const checklistKey = `checklist-${index}`;
   const [visibleChecklist, setVisibleChecklist] = useState(false);
-
-  // ✅ NEW: State to toggle Trader Idea section
   const [showTraderIdeas, setShowTraderIdeas] = useState(false);
 
   const [checklist, setChecklist] = useState(() => {
@@ -78,7 +76,6 @@ const JournalEntryCard = ({
     setVisibleChecklist((prev) => !prev);
   };
 
-  // ✅ Toggle Trader Idea images
   const toggleTraderIdeas = () => {
     setShowTraderIdeas((prev) => !prev);
   };
@@ -87,9 +84,17 @@ const JournalEntryCard = ({
   const total = Object.keys(defaultChecklistItems).length;
   const { probability, risk, color } = getProbabilityRiskColor(completed, total);
 
+  // ✅ Archive entry handler
+  const handleArchive = () => {
+    const archived = JSON.parse(localStorage.getItem('archivedJournalEntries')) || [];
+    const updatedArchive = [...archived, entry];
+    localStorage.setItem('archivedJournalEntries', JSON.stringify(updatedArchive));
+    onDelete(index);
+  };
+
   return (
     <div className="border p-5 rounded-xl mb-6 bg-white shadow-md">
-      {/* Basic info */}
+      {/* Basic Info */}
       <div className="grid sm:grid-cols-2 gap-4 mb-4">
         <p><strong>Pair:</strong> {entry.pair}</p>
         <p><strong>Type:</strong> {entry.type}</p>
@@ -99,14 +104,14 @@ const JournalEntryCard = ({
         <p className="sm:col-span-2"><strong>Emotions:</strong> {entry.emotions.join(', ') || 'None'}</p>
       </div>
 
-      {/* Setup, Entry, Profit images */}
+      {/* Trade Images */}
       <div className="flex overflow-x-auto space-x-4 mt-4 pb-2">
         {entry.setupImage && <ImageCard label="Setup" src={entry.setupImage} />}
         {entry.entryImage && <ImageCard label="Entry" src={entry.entryImage} />}
         {entry.profitImage && <ImageCard label="Profit" src={entry.profitImage} />}
       </div>
 
-      {/* ✅ Button to toggle Trader Idea images */}
+      {/* Trader Ideas */}
       <button
         onClick={toggleTraderIdeas}
         className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
@@ -114,7 +119,6 @@ const JournalEntryCard = ({
         {showTraderIdeas ? 'Hide Traders Idea' : 'Show Traders Idea'}
       </button>
 
-      {/* ✅ Conditionally render Trader Idea images */}
       {showTraderIdeas && (
         <div className="flex overflow-x-auto space-x-4 mt-4 pb-2">
           {entry.traderIdeaMorning && <ImageCard label="Trader Idea Morning" src={entry.traderIdeaMorning} />}
@@ -160,7 +164,7 @@ const JournalEntryCard = ({
         )}
       </div>
 
-      {/* Buttons */}
+      {/* Action Buttons */}
       <div className="mt-6 flex flex-wrap gap-3">
         <button
           onClick={() => onEdit(index)}
@@ -174,12 +178,18 @@ const JournalEntryCard = ({
         >
           Delete
         </button>
+        <button
+          onClick={handleArchive}
+          className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+        >
+          Archive
+        </button>
       </div>
     </div>
   );
 };
 
-// Reusable Image Card component
+// ImageCard component
 const ImageCard = ({ label, src }) => (
   <div className="min-w-[200px] max-w-xs flex-shrink-0">
     <p className="text-sm text-gray-600 mb-1 font-semibold">{label} Image</p>

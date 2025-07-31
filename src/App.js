@@ -5,6 +5,7 @@ import TradingJournalForm from './components-mgi/TradeJournal/TradingJournalForm
 import RiskManagement from './components-mgi/RiskManagement/RiskManagement';
 import ProgressiveGraphs from './components-mgi/RiskManagement/ProgressiveGraphs';
 import FundedAccount from './components-mgi/FundedAccount/FundedAccount';
+import ArchivedTradesView from './components-mgi/ArchiveForder/ArchivedTradesView';
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
           <Route path="/riskmanagement" element={<RiskManagement />} />
           <Route path="/riskmanagementfunded" element={<FundedAccount />} />
           <Route path="/graphs" element={<ProgressiveGraphs />} />
+          <Route path="/archive" element={<ArchivedTradesView />} />
         </Routes>
       </div>
     </div>
