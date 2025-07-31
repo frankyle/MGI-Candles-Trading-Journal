@@ -25,6 +25,7 @@ const Header = () => {
           <Link to="/riskmanagement" onClick={() => setMobileMenuOpen(false)} className="block text-gray-700 font-medium hover:text-indigo-600">Risk Management (Personal)</Link>
           <Link to="/riskmanagementfunded" onClick={() => setMobileMenuOpen(false)} className="block text-gray-700 font-medium hover:text-indigo-600">Risk Management (Funded)</Link>
           <Link to="/graphs" onClick={() => setMobileMenuOpen(false)} className="block text-gray-700 font-medium hover:text-indigo-600"> Progress Graphs</Link>
+          <Link to="/archive" onClick={() => setMobileMenuOpen(false)} className="block text-gray-700 font-medium hover:text-indigo-600"> Archive Trades</Link>
      
           {!isLoggedIn ? (
             <>
@@ -58,6 +59,7 @@ const Header = () => {
           <Link to="/riskmanagement" onClick={() => setMobileMenuOpen(false)} className="block text-gray-700 font-medium hover:text-indigo-600">Risk Management (Personal)</Link>
           <Link to="/riskmanagementfunded" onClick={() => setMobileMenuOpen(false)} className="block text-gray-700 font-medium hover:text-indigo-600">Risk Management (Funded)</Link>
           <Link to="/graphs" onClick={() => setMobileMenuOpen(false)} className="block text-gray-700 font-medium hover:text-indigo-600"> Progress Graphs</Link>
+          <Link to="/archive" onClick={() => setMobileMenuOpen(false)} className="block text-gray-700 font-medium hover:text-indigo-600"> Archive Trades</Link>
      
           {!isLoggedIn ? (
             <>

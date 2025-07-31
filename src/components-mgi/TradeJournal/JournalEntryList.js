@@ -1,10 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import JournalEntryCard from './JournalEntryCard';
 
-const JournalEntryList = ({ journal, onEdit, onDelete }) => {
+const JournalEntryList = ({ journal, onEdit, onDelete, onArchive }) => {
   const [sortOption, setSortOption] = useState('date-desc');
-  
-  // ✅ State to manage Trader's Idea visibility per entry
   const [visibleIdeas, setVisibleIdeas] = useState({});
 
   const toggleIdeaVisibility = (index) => {
@@ -27,7 +25,6 @@ const JournalEntryList = ({ journal, onEdit, onDelete }) => {
     <div className="mt-10">
       <h3 className="text-xl font-bold text-gray-800 mb-4 text-center">Journal Entries</h3>
 
-      {/* Sort Dropdown */}
       <div className="flex justify-center mb-6">
         <select
           value={sortOption}
@@ -51,6 +48,7 @@ const JournalEntryList = ({ journal, onEdit, onDelete }) => {
             index={index}
             onEdit={onEdit}
             onDelete={onDelete}
+            onArchive={onArchive} // ✅ Pass down archive handler
             visibleIdeas={visibleIdeas}
             toggleIdeaVisibility={toggleIdeaVisibility}
           />
