@@ -16,27 +16,24 @@ const formatDate = (dateStr) => {
 const defaultChecklistItems = {
   fourHourTrend: 'Is the 4H trend in your direction?',
   fibZone: 'Are you in the Fib Discount Zone?',
-  ictBox: 'Is the FVG Forming/Broken?',
   majorZones: 'How many PDL/PDH, Weekly Open, PWH/PWL, Daily Open?',
   newyork: 'PDL/PDH Newyork was not broken by Asian?',
-  bos: 'Is there a Break of Structure in 15min (BoS)?',
-  orderBlock: 'Do you see a 30min/1hr Order Block?',
-  dailyMovement: 'Does it align with the Daily Movement direction?',
   amd: 'Is there a clear Accumulation-Manipulation-Distribution (AMD) pattern?',
+  bos: 'Is there a DIVERGENCE in 15min?',
+  ictBox: 'Is there FVG / Invented FVG?',
   engulfingCandle: 'Do you see a Bullish/Bearish Engulfing Candle?',
-  utAlert: 'Is there a UT Alert signal in No Wicks chart?',
 };
 
 // Probability calculation
 const getProbabilityRiskColor = (completed, total) => {
   if (completed >= total) {
-    return { probability: 'High Probability', risk: '3%', color: 'text-green-600' };
-  } else if (completed >= 9) {
-    return { probability: 'Medium Probability', risk: '2%', color: 'text-yellow-500' };
-  } else if (completed >= 6) {
-    return { probability: 'Low Probability', risk: '1%', color: 'text-orange-500' };
+    return { probability: 'High Probability', risk: '3', color: 'text-green-600' };
+  } else if (completed >= 5) {
+    return { probability: 'Medium Probability', risk: '2', color: 'text-yellow-500' };
+  } else if (completed >= 3) {
+    return { probability: 'Low Probability', risk: '1', color: 'text-orange-500' };
   }
-  return { probability: 'Very Low Probability', risk: '0.5%', color: 'text-red-600' };
+  return { probability: 'Very Low Probability', risk: '0.5', color: 'text-red-600' };
 };
 
 const JournalEntryCard = ({
@@ -44,8 +41,6 @@ const JournalEntryCard = ({
   index,
   onEdit,
   onDelete,
-  visibleIdeas,
-  toggleIdeaVisibility,
 }) => {
   const checklistKey = `checklist-${index}`;
   const [visibleChecklist, setVisibleChecklist] = useState(false);
@@ -104,7 +99,7 @@ const JournalEntryCard = ({
         <p className="sm:col-span-2"><strong>Emotions:</strong> {entry.emotions.join(', ') || 'None'}</p>
       </div>
 
-      {/* Trade Images */}
+      {/* Trade Images Images */}
       <div className="flex overflow-x-auto space-x-4 mt-4 pb-2">
         {entry.setupImage && <ImageCard label="Setup" src={entry.setupImage} />}
         {entry.entryImage && <ImageCard label="Entry" src={entry.entryImage} />}
