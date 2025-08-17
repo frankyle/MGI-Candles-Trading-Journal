@@ -63,8 +63,6 @@ const TradeForm = ({ form, onChange, onSubmit, onImageChange, onEmotionToggle, e
         )}
       </div>
 
-      {/* Emotions */}
-      <EmotionSelector emotions={form.emotions} onToggle={onEmotionToggle} />
 
       {/* Image Upload Fields */}
       <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
@@ -109,6 +107,10 @@ const TradeForm = ({ form, onChange, onSubmit, onImageChange, onEmotionToggle, e
       >
         {editIndex !== null ? 'Update Trade' : 'Save Trade'}
       </button>
+
+            {/* Emotions */}
+      <EmotionSelector emotions={form.emotions} onToggle={onEmotionToggle} />
+
     </form>
   );
 };
