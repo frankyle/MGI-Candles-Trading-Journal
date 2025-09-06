@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import JournalChecklist from './JournalChecklist';
+import EmotionalChecklist from './EmotionalChecklist'; // ✅ import here
 
 // Format date for readability
 const formatDate = (dateStr) => {
@@ -16,6 +17,7 @@ const formatDate = (dateStr) => {
 const JournalEntryCard = ({ entry, index, onEdit, onDelete }) => {
   const checklistKey = `checklist-${index}`;
   const [showTraderIdeas, setShowTraderIdeas] = useState(false);
+  const [showChecklist, setShowChecklist] = useState(false); // ✅ new toggle
   const [modalImage, setModalImage] = useState(null);
   const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 768);
 
@@ -77,9 +79,24 @@ const JournalEntryCard = ({ entry, index, onEdit, onDelete }) => {
         </div>
       )}
 
+      {/* Emotional Intelligence Checklist */}
+      <button
+        onClick={() => setShowChecklist((prev) => !prev)}
+        className="mt-4 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+      >
+        {showChecklist ? 'Hide Emotional Intelligence' : 'Show Emotional Intelligence'}
+      </button>
+
+      {showChecklist && (
+        <div className="mt-4">
+          <EmotionalChecklist /> {/* ✅ show your checklist here */}
+        </div>
+      )}
+
+
       {/* Checklist (separated component) */}
       <JournalChecklist checklistKey={checklistKey} />
-
+      
       {/* Action Buttons */}
       <div className="mt-6 flex flex-wrap gap-3">
         <button
