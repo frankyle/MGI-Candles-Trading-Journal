@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 
-const EmotionalChecklist = () => {
+const EmotionalChecklist = ({ pair }) => {
   const [entries, setEntries] = useState([]);
   const [showChecklist, setShowChecklist] = useState(false);
 
@@ -56,20 +56,20 @@ const EmotionalChecklist = () => {
     outcome: "",
   });
 
+  const storageKey = `emotionalJournal_${pair}`;
+
   // Load from localStorage on mount
   useEffect(() => {
-    const savedEntries = localStorage.getItem("emotionalJournal");
+    const savedEntries = localStorage.getItem(storageKey);
     if (savedEntries) {
       setEntries(JSON.parse(savedEntries));
     }
-  }, []);
+  }, [storageKey]);
 
   // Save entries to localStorage whenever it changes
   useEffect(() => {
-    if (entries.length > 0) {
-      localStorage.setItem("emotionalJournal", JSON.stringify(entries));
-    }
-  }, [entries]);
+    localStorage.setItem(storageKey, JSON.stringify(entries));
+  }, [entries, storageKey]);
 
   const handleCheckbox = (stage, value) => {
     const current = selected[stage];
@@ -110,12 +110,15 @@ const EmotionalChecklist = () => {
 
     setEntries(updatedEntries);
 
-    // Save immediately after submit
-    localStorage.setItem("emotionalJournal", JSON.stringify(updatedEntries));
-
     // Reset form
     setSelected({ before: [], during: [], after: [], outcome: "" });
     setShowChecklist(false);
+  };
+
+  // Delete/reset a single entry
+  const handleDelete = (index) => {
+    const updatedEntries = entries.filter((_, i) => i !== index);
+    setEntries(updatedEntries);
   };
 
   const scoreColor = (score) => {
@@ -127,7 +130,7 @@ const EmotionalChecklist = () => {
   return (
     <div className="p-6 max-w-6xl mx-auto">
       <h2 className="text-2xl font-bold mb-4 text-center">
-        🧠 Emotional Intelligence Journal
+        🧠 Emotional Intelligence Journal - {pair}
       </h2>
 
       {/* Toggle Button */}
@@ -212,7 +215,7 @@ const EmotionalChecklist = () => {
       )}
 
       {/* Journal Table */}
-      <h3 className="text-xl font-semibold mt-6 mb-2">📊 Trade Journal</h3>
+      <h3 className="text-xl font-semibold mt-6 mb-2">📊 {pair} Journal</h3>
       <table className="w-full border-collapse border border-gray-300 text-sm">
         <thead>
           <tr className="bg-gray-100">
@@ -221,6 +224,7 @@ const EmotionalChecklist = () => {
             <th className="border p-2">After</th>
             <th className="border p-2">Outcome</th>
             <th className="border p-2">EI Score</th>
+            <th className="border p-2">Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -232,6 +236,14 @@ const EmotionalChecklist = () => {
               <td className="border p-2">{entry.outcome}</td>
               <td className={`border p-2 ${scoreColor(entry.score)}`}>
                 {entry.score}%
+              </td>
+              <td className="border p-2 text-center">
+                <button
+                  onClick={() => handleDelete(i)}
+                  className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
+                >
+                  Reset
+                </button>
               </td>
             </tr>
           ))}
