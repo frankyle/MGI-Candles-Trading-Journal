@@ -11,8 +11,9 @@ const nySessionChecklist = [
   {
     step: "Swing Range & Discount Zone",
     checks: [
-      "Draw Fib (Low → High for BUY, High → Low for SELL)",
-      "Wait for retracement into 50–61.8%",
+      "Fib retracement at 50–61.8%",
+      "Fib retracement at 61.8-75%",
+      "Fib retracement at 75–100%",
     ],
   },
   {
@@ -43,60 +44,51 @@ const nySessionChecklist = [
 ];
 
 const amdChecklist = [
-  {
-    step: "Accumulation",
-    checks: [
-      "Market sweeping liquidity at lows",
-      "Consolidation forming",
-      "Signs of reversal",
-    ],
-  },
-  {
-    step: "Manipulation",
-    checks: [
-      "Stop hunt (above/below structure)",
-      "Fake breakout",
-      "Liquidity grab confirmed",
-    ],
-  },
-  {
-    step: "Distribution",
-    checks: [
-      "Strong displacement in intended direction",
-      "Retest of OB/FVG",
-      "Trend continuation",
-    ],
-  },
+  { step: "Accumulation", checks: ["Asian Session created liquidity", "(Asian + London) Session  created liquidity"] },
+  { step: "Manipulation", checks: ["Liquidity grab by LONDON", "Liquidity grab by NEWYORK"] },
+  { step: "Distribution", checks: ["Mitigated FVG", "FVG", "Engulfing Candle"] },
 ];
 
 const probabilityBoosters = [
   "Weekly Open",
   "Daily Open",
+  "Previous Daily High/Low",
   "Previous Weekly High/Low",
 ];
 
-const JournalChecklist = ({ currency }) => {
+const JournalChecklist = ({ entryId }) => {
   const [checked, setChecked] = useState({});
   const [finalDecision, setFinalDecision] = useState(null);
   const [showChecklist, setShowChecklist] = useState(false);
 
-  // Load saved checklist from localStorage
+  const coreSteps = [
+    "Macro Filter",
+    "Swing Range & Discount Zone",
+    "Risk Definition",
+    "Lower TF Confirmation",
+    "Execution & Targets",
+    "Accumulation",
+    "Manipulation",
+    "Distribution",
+  ];
+
+  // Load saved checklist
   useEffect(() => {
-    const savedData = localStorage.getItem(`checklist_${currency}`);
+    const savedData = localStorage.getItem(`checklist_entry_${entryId}`);
     if (savedData) {
       const parsed = JSON.parse(savedData);
       setChecked(parsed.checked || {});
       setFinalDecision(parsed.finalDecision || null);
     }
-  }, [currency]);
+  }, [entryId]);
 
-  // Save to localStorage whenever checked or finalDecision changes
+  // Save to localStorage
   useEffect(() => {
     localStorage.setItem(
-      `checklist_${currency}`,
+      `checklist_entry_${entryId}`,
       JSON.stringify({ checked, finalDecision })
     );
-  }, [checked, finalDecision, currency]);
+  }, [checked, finalDecision, entryId]);
 
   const handleCheck = (item) => {
     setChecked((prev) => ({
@@ -105,7 +97,22 @@ const JournalChecklist = ({ currency }) => {
     }));
   };
 
+  const completedCoreSteps = coreSteps.filter((step) => {
+    const nyChecks = nySessionChecklist.find((s) => s.step === step)?.checks || [];
+    const amdChecks = amdChecklist.find((s) => s.step === step)?.checks || [];
+    const allChecks = [...nyChecks, ...amdChecks];
+    return allChecks.some((c) => checked[c]);
+  }).length;
+
+  const minRequired = 6;
+  const isReady = completedCoreSteps >= minRequired;
+
   const evaluateDecision = () => {
+    if (!isReady) {
+      setFinalDecision("⚠️ You need at least 6 core steps before evaluating.");
+      return;
+    }
+
     const buySignals = Object.keys(checked).filter(
       (c) => checked[c] && c.includes("BUY")
     ).length;
@@ -124,16 +131,44 @@ const JournalChecklist = ({ currency }) => {
 
   return (
     <div className="p-6 max-w-3xl mx-auto bg-white text-gray-900 rounded-2xl shadow-lg border border-gray-200">
-      {/* Toggle Checklist Button */}
       <button
         onClick={() => setShowChecklist(!showChecklist)}
         className="mb-6 px-6 py-2 bg-green-600 text-white rounded-xl font-semibold hover:bg-blue-500 transition"
       >
-        {showChecklist ? "🙈 Hide Checklist" : `📋 View Checklist for ${currency}`}
+        {showChecklist ? "🙈 Hide Checklist" : "📋 View Checklist"}
       </button>
 
       {showChecklist && (
         <>
+          <div className="mb-6 p-4 bg-gray-100 rounded-xl border border-gray-300">
+            <p className="font-semibold text-lg">
+              Core Steps Completed: {completedCoreSteps} / {coreSteps.length}
+            </p>
+            <p className={`mt-2 text-xl font-bold ${isReady ? "text-green-600" : "text-red-600"}`}>
+              {isReady ? "✅ READY to Enter Trade" : "❌ NOT READY (Need at least 6)"}
+            </p>
+
+            {finalDecision && (
+              <div
+                className={`mb-6 p-4 rounded-xl border text-xl font-bold flex items-center gap-3 ${
+                  finalDecision.includes("BUY")
+                    ? "bg-green-50 border-green-300 text-blue-900"
+                    : finalDecision.includes("SELL")
+                    ? "bg-red-50 border-red-300 text-red-900"
+                    : finalDecision.includes("No clear")
+                    ? "bg-blue-50 border-blue-300 text-blue-800"
+                    : "bg-yellow-50 border-yellow-300 text-yellow-800"
+                }`}
+              >
+                {finalDecision.includes("BUY") && <span>📈</span>}
+                {finalDecision.includes("SELL") && <span>📉</span>}
+                {finalDecision.includes("No clear") && <span>⚖️</span>}
+                {finalDecision.includes("⚠️") && <span>⚠️</span>}
+                <span>{finalDecision}</span>
+              </div>
+            )}
+          </div>
+
           <h1 className="text-2xl font-bold mb-4">📋 NY Session Checklist</h1>
           {nySessionChecklist.map((section, idx) => (
             <div key={idx} className="mb-4">
@@ -185,16 +220,12 @@ const JournalChecklist = ({ currency }) => {
 
           <button
             onClick={evaluateDecision}
-            className="mt-6 px-6 py-2 bg-gray-900 text-white hover:bg-gray-800 rounded-xl font-semibold transition"
+            className={`mt-6 px-6 py-2 rounded-xl font-semibold transition ${
+              isReady ? "bg-gray-900 text-white hover:bg-gray-800" : "bg-gray-400 text-white"
+            }`}
           >
             ✅ Evaluate Setup
           </button>
-
-          {finalDecision && (
-            <div className="mt-6 p-4 bg-gray-100 rounded-xl text-lg font-bold border border-gray-300">
-              {finalDecision}
-            </div>
-          )}
         </>
       )}
     </div>
