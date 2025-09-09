@@ -21,12 +21,14 @@ const Header = () => {
 
         {/* Desktop Nav */}
         <nav className="hidden md:flex space-x-6 items-center">
-          <Link to="/" className="text-gray-700 hover:text-indigo-600 font-medium transition">Trades</Link>
+          <Link to="/" className="text-gray-700 hover:text-indigo-600 font-medium transition">Home</Link>
+          <Link to="/trades" className="text-gray-700 hover:text-indigo-600 font-medium transition">Trades</Link>
+          <Link to="/membership" onClick={() => setMobileMenuOpen(false)} className="block text-gray-700 font-medium hover:text-indigo-600"> Membership Plans</Link>
           <Link to="/riskmanagement" onClick={() => setMobileMenuOpen(false)} className="block text-gray-700 font-medium hover:text-indigo-600">Risk Management (Personal)</Link>
           <Link to="/riskmanagementfunded" onClick={() => setMobileMenuOpen(false)} className="block text-gray-700 font-medium hover:text-indigo-600">Risk Management (Funded)</Link>
-          <Link to="/graphs" onClick={() => setMobileMenuOpen(false)} className="block text-gray-700 font-medium hover:text-indigo-600"> Progress Graphs</Link>
           <Link to="/archive" onClick={() => setMobileMenuOpen(false)} className="block text-gray-700 font-medium hover:text-indigo-600"> Archive Trades</Link>
-     
+          <Link to="/contactus" onClick={() => setMobileMenuOpen(false)} className="block text-gray-700 font-medium hover:text-indigo-600"> Contact Us</Link>
+      
           {!isLoggedIn ? (
             <>
               <button className="bg-indigo-600 text-white px-4 py-2 rounded-full font-medium hover:bg-indigo-700 transition">
@@ -55,11 +57,13 @@ const Header = () => {
       {/* Mobile Nav */}
       {mobileMenuOpen && (
         <div className="md:hidden bg-white px-4 pb-4 space-y-3 shadow-md">
-          <Link to="/" onClick={() => setMobileMenuOpen(false)} className="block text-gray-700 font-medium hover:text-indigo-600">Trades</Link>
+          <Link to="/" onClick={() => setMobileMenuOpen(false)} className="block text-gray-700 font-medium hover:text-indigo-600">Home</Link>
+          <Link to="/trades" onClick={() => setMobileMenuOpen(false)} className="block text-gray-700 font-medium hover:text-indigo-600">Trades</Link>
+          <Link to="/membership" onClick={() => setMobileMenuOpen(false)} className="block text-gray-700 font-medium hover:text-indigo-600"> Membership Plans</Link>
           <Link to="/riskmanagement" onClick={() => setMobileMenuOpen(false)} className="block text-gray-700 font-medium hover:text-indigo-600">Risk Management (Personal)</Link>
           <Link to="/riskmanagementfunded" onClick={() => setMobileMenuOpen(false)} className="block text-gray-700 font-medium hover:text-indigo-600">Risk Management (Funded)</Link>
-          <Link to="/graphs" onClick={() => setMobileMenuOpen(false)} className="block text-gray-700 font-medium hover:text-indigo-600"> Progress Graphs</Link>
           <Link to="/archive" onClick={() => setMobileMenuOpen(false)} className="block text-gray-700 font-medium hover:text-indigo-600"> Archive Trades</Link>
+          <Link to="/contactus" onClick={() => setMobileMenuOpen(false)} className="block text-gray-700 font-medium hover:text-indigo-600"> Contact Us</Link>
      
           {!isLoggedIn ? (
             <>
