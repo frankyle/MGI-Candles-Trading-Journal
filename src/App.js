@@ -6,7 +6,7 @@ import RiskManagement from './components-mgi/RiskManagement/RiskManagement';
 import FundedAccount from './components-mgi/FundedAccount/FundedAccount';
 import ArchivedTradesView from './components-mgi/ArchiveForder/ArchivedTradesView';
 import Homepage from './components-mgi/Home/Homepage';
-import Membership from './components-mgi/Membership/Membership';
+// import Membership from './components-mgi/Membership/Membership';
 import ContactUs from './components-mgi/Home/ContactUs';
 
 function App() {
@@ -19,8 +19,8 @@ function App() {
           <Route path="/trades" element={<TradingJournalForm />} />
           <Route path="/riskmanagement" element={<RiskManagement />} />
           <Route path="/riskmanagementfunded" element={<FundedAccount />} />
-          <Route path="/membership" element={<Membership />} />
-          <Route path="/archive" element={<ArchivedTradesView />} />
+          {/* <Route path="/membership" element={<Membership />} /> */}
+          <Route path="/journal" element={<ArchivedTradesView />} />
           <Route path="/contactus" element={<ContactUs />} />
         </Routes>
       </div>
