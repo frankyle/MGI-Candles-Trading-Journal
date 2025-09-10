@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Menu, X, ChevronDown } from "lucide-react";
 import { Link } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import logo from "../images/MGI logo.png";
 
 const Header = () => {
@@ -33,7 +34,6 @@ const Header = () => {
           <nav className="hidden md:flex space-x-6 items-center ml-12 relative">
             <NavLink to="/" label="Home" />
             <NavLink to="/trades" label="Trades" />
-            {/* <NavLink to="/membership" label="Membership" /> */}
 
             {/* Lessons Dropdown */}
             <div className="relative">
@@ -97,90 +97,102 @@ const Header = () => {
         </div>
       </div>
 
-      {/* Mobile Nav */}
-      {mobileMenuOpen && (
-        <div className="md:hidden backdrop-blur-lg bg-white/95 shadow-lg px-6 pb-5 space-y-3 animate-fadeIn">
-          <NavLink to="/" label="Home" close={() => setMobileMenuOpen(false)} />
-          <NavLink
-            to="/trades"
-            label="Trades"
-            close={() => setMobileMenuOpen(false)}
-          />
-          {/* <NavLink
-            to="/membership"
-            label="Membership"
-            close={() => setMobileMenuOpen(false)}
-          /> */}
+      {/* Mobile Nav with Animation */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.35, ease: "easeInOut" }}
+            className="md:hidden backdrop-blur-lg bg-white/95 shadow-lg px-6 pb-5 space-y-3"
+          >
+            <NavLink to="/" label="Home" close={() => setMobileMenuOpen(false)} />
+            <NavLink
+              to="/trades"
+              label="Trades"
+              close={() => setMobileMenuOpen(false)}
+            />
 
-          {/* Mobile Lessons Dropdown */}
-          <div className="space-y-1">
-            <button
-              onClick={toggleLessons}
-              className="flex items-center justify-between w-full text-gray-800 font-medium hover:text-green-600"
-            >
-              Lessons <ChevronDown size={16} />
-            </button>
-            {lessonsOpen && (
-              <div className="pl-4 space-y-1">
-                <DropdownLink
-                  to="/riskmanagement"
-                  label="📊 Risk (Personal)"
-                  close={() => {
-                    setMobileMenuOpen(false);
-                    setLessonsOpen(false);
-                  }}
-                />
-                <DropdownLink
-                  to="/riskmanagementfunded"
-                  label="💼 Risk (Funded)"
-                  close={() => {
-                    setMobileMenuOpen(false);
-                    setLessonsOpen(false);
-                  }}
-                />
-              </div>
+            {/* Mobile Lessons Dropdown */}
+            <div className="space-y-1">
+              <button
+                onClick={toggleLessons}
+                className="flex items-center justify-between w-full text-gray-800 font-medium hover:text-green-600"
+              >
+                Lessons <ChevronDown size={16} />
+              </button>
+
+              <AnimatePresence>
+                {lessonsOpen && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="pl-4 space-y-1"
+                  >
+                    <DropdownLink
+                      to="/riskmanagement"
+                      label="📊 Risk (Personal)"
+                      close={() => {
+                        setMobileMenuOpen(false);
+                        setLessonsOpen(false);
+                      }}
+                    />
+                    <DropdownLink
+                      to="/riskmanagementfunded"
+                      label="💼 Risk (Funded)"
+                      close={() => {
+                        setMobileMenuOpen(false);
+                        setLessonsOpen(false);
+                      }}
+                    />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            <NavLink
+              to="/journal"
+              label="Journal"
+              close={() => setMobileMenuOpen(false)}
+            />
+            <NavLink
+              to="/contactus"
+              label="Contacts"
+              close={() => setMobileMenuOpen(false)}
+            />
+
+            {!isLoggedIn ? (
+              <>
+                <Link
+                  to="/free-signals"
+                  className="w-full text-center block bg-white px-4 py-2 rounded-full font-medium border border-green-400 text-green-700 hover:bg-green-50 shadow-sm transition"
+                >
+                  Get Free Signals
+                </Link>
+                <Link
+                  to="/signup"
+                  className="w-full text-center block bg-gradient-to-r from-green-500 to-emerald-500 text-white px-4 py-2 rounded-full font-medium shadow-md hover:opacity-95 transition"
+                >
+                  Join Premium
+                </Link>
+              </>
+            ) : (
+              <button
+                onClick={() => {
+                  toggleAuth();
+                  setMobileMenuOpen(false);
+                }}
+                className="w-full bg-red-600 text-white px-4 py-2 rounded-full font-medium hover:bg-red-700"
+              >
+                Sign Out
+              </button>
             )}
-          </div>
-
-          <NavLink
-            to="/journal"
-            label="Journal"
-            close={() => setMobileMenuOpen(false)}
-          />
-          <NavLink
-            to="/contactus"
-            label="Contacts"
-            close={() => setMobileMenuOpen(false)}
-          />
-
-          {!isLoggedIn ? (
-            <>
-              <Link
-                to="/free-signals"
-                className="w-full text-center block bg-white px-4 py-2 rounded-full font-medium border border-green-400 text-green-700 hover:bg-green-50 shadow-sm transition"
-              >
-                Get Free Signals
-              </Link>
-              <Link
-                to="/signup"
-                className="w-full text-center block bg-gradient-to-r from-green-500 to-emerald-500 text-white px-4 py-2 rounded-full font-medium shadow-md hover:opacity-95 transition"
-              >
-                Join Premium
-              </Link>
-            </>
-          ) : (
-            <button
-              onClick={() => {
-                toggleAuth();
-                setMobileMenuOpen(false);
-              }}
-              className="w-full bg-red-600 text-white px-4 py-2 rounded-full font-medium hover:bg-red-700"
-            >
-              Sign Out
-            </button>
-          )}
-        </div>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </header>
   );
 };
@@ -191,7 +203,7 @@ function NavLink({ to, label, close }) {
     <Link
       to={to}
       onClick={close}
-      className="text-gray-800 hover:text-green-600 font-medium transition-colors"
+      className="block py-2 text-gray-800 hover:text-green-600 font-medium transition-colors"
     >
       {label}
     </Link>
