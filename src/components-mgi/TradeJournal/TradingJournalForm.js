@@ -112,9 +112,6 @@ const TradingJournalForm = () => {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-6">
-      <h2 className="text-2xl font-bold text-indigo-700 mb-6 text-center">
-        {editIndex !== null ? 'Edit Trade Entry' : 'New Trade Entry'}
-      </h2>
 
       <TradeForm
         form={form}
