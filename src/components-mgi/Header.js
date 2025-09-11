@@ -7,11 +7,11 @@ import logo from "../images/MGI logo.png";
 const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [lessonsOpen, setLessonsOpen] = useState(false);
+  const [progressOpen, setProgressOpen] = useState(false);
 
   const toggleAuth = () => setIsLoggedIn(!isLoggedIn);
   const toggleMobileMenu = () => setMobileMenuOpen(!mobileMenuOpen);
-  const toggleLessons = () => setLessonsOpen(!lessonsOpen);
+  const toggleProgress = () => setProgressOpen(!progressOpen);
 
   return (
     <header className="fixed top-0 left-0 w-full z-50">
@@ -33,27 +33,27 @@ const Header = () => {
           {/* Desktop Nav */}
           <nav className="hidden md:flex space-x-6 items-center ml-12 relative">
             <NavLink to="/" label="Home" />
-            <NavLink to="/trades" label="Trades" />
+            <NavLink to="/trades" label="My Trades" />
 
-            {/* Lessons Dropdown */}
+            {/* Progress Dropdown */}
             <div className="relative">
               <button
-                onClick={toggleLessons}
+                onClick={toggleProgress}
                 className="flex items-center text-gray-800 hover:text-green-600 font-medium transition-colors focus:outline-none"
               >
-                Lessons <ChevronDown size={16} className="ml-1" />
+                Progress <ChevronDown size={16} className="ml-1" />
               </button>
-              {lessonsOpen && (
+              {progressOpen && (
                 <div className="absolute mt-2 w-56 bg-white shadow-xl rounded-lg py-2 border border-green-100 animate-fadeIn z-50">
                   <DropdownLink
                     to="/riskmanagement"
                     label="📊 Risk Management (Personal)"
-                    close={() => setLessonsOpen(false)}
+                    close={() => setProgressOpen(false)}
                   />
                   <DropdownLink
                     to="/riskmanagementfunded"
                     label="💼 Risk Management (Funded)"
-                    close={() => setLessonsOpen(false)}
+                    close={() => setProgressOpen(false)}
                   />
                 </div>
               )}
@@ -110,21 +110,21 @@ const Header = () => {
             <NavLink to="/" label="Home" close={() => setMobileMenuOpen(false)} />
             <NavLink
               to="/trades"
-              label="Trades"
+              label="My Trades"
               close={() => setMobileMenuOpen(false)}
             />
 
-            {/* Mobile Lessons Dropdown */}
+            {/* Mobile Progress Dropdown */}
             <div className="space-y-1">
               <button
-                onClick={toggleLessons}
+                onClick={toggleProgress}
                 className="flex items-center justify-between w-full text-gray-800 font-medium hover:text-green-600"
               >
-                Lessons <ChevronDown size={16} />
+                Progress <ChevronDown size={16} />
               </button>
 
               <AnimatePresence>
-                {lessonsOpen && (
+                {progressOpen && (
                   <motion.div
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: "auto", opacity: 1 }}
@@ -137,7 +137,7 @@ const Header = () => {
                       label="📊 Risk (Personal)"
                       close={() => {
                         setMobileMenuOpen(false);
-                        setLessonsOpen(false);
+                        setProgressOpen(false);
                       }}
                     />
                     <DropdownLink
@@ -145,7 +145,7 @@ const Header = () => {
                       label="💼 Risk (Funded)"
                       close={() => {
                         setMobileMenuOpen(false);
-                        setLessonsOpen(false);
+                        setProgressOpen(false);
                       }}
                     />
                   </motion.div>
