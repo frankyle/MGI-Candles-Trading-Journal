@@ -1,13 +1,8 @@
+import { Crosshair } from "lucide-react";
 import React, { useState, useEffect } from "react";
 
 const nySessionChecklist = [
-  {
-    step: "Macro Filter",
-    checks: [
-      "BUY → Previous NY low NOT broken",
-      "SELL → Previous NY high NOT broken",
-    ],
-  },
+  
   {
     step: "Swing Range & Discount Zone",
     checks: [
@@ -17,26 +12,38 @@ const nySessionChecklist = [
     ],
   },
   {
+    step: "Macro Filter",
+    checks: [
+      "BUY → Previous NY low NOT broken (1.Old & 2.New)",
+      "SELL → Previous NY high NOT broken (1.Old & 2.New)",
+    ],
+  },
+  {
     step: "Risk Definition",
     checks: [
-      "Kill Zone = Swing Low/High",
-      "SL beyond Kill Zone",
+      "Kill Zone = Recent Newyork",
+      "SL beyond Second Newyork",
       "If Kill Zone broken → INVALID",
     ],
   },
   {
     step: "Lower TF Confirmation",
     checks: [
-      "Break of Structure inside Discount Zone",
+      "Break block inside Discount Zone (15min->Simple)/5min->Aggresive)",
       "OB Retest",
       "FVG confluence",
     ],
   },
   {
-    step: "Execution & Targets",
+    step: (
+      <span className="flex items-center gap-2">
+        <Crosshair className="w-5 h-5 text-red-600" />
+        Execution & Targets (Sniper Concept)
+      </span>
+    ),
     checks: [
-      "Entry = OB/FVG after BOS",
-      "SL = Below swing low (BUY) / Above swing high (SELL)",
+      "Entry = Breaker Block (BOS)--->(Green=Buys & Red=Sells)",
+      "SL = Below Newyork low (BUY) / Above Newyork high (SELL)",
       "TP1 = 100% Fib",
       "TP2 = Extension (new HH/LL)",
     ],
@@ -45,7 +52,7 @@ const nySessionChecklist = [
 
 const amdChecklist = [
   { step: "Accumulation", checks: ["Asian Session created liquidity", "(Asian + London) Session  created liquidity"] },
-  { step: "Manipulation", checks: ["Liquidity grab by LONDON", "Liquidity grab by NEWYORK"] },
+  { step: "Manipulation", checks: ["Liquidity grab by LONDON", "Liquidity grab by LONDON & NEWYORK"] },
   { step: "Distribution", checks: ["Mitigated FVG", "FVG", "Engulfing Candle"] },
 ];
 
