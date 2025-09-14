@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 const nySessionChecklist = [
   
   {
-    step: "Swing Range & Discount Zone",
+    step: "Swing Range & Discount Zone (4hr Timeframe)",
     checks: [
       "Fib retracement at 50–61.8%",
       "Fib retracement at 61.8-75%",
@@ -12,14 +12,14 @@ const nySessionChecklist = [
     ],
   },
   {
-    step: "Macro Filter",
+    step: "Macro Filter(1hr TimeFrame)",
     checks: [
       "BUY → Previous NY low NOT broken (1.Old & 2.New)",
       "SELL → Previous NY high NOT broken (1.Old & 2.New)",
     ],
   },
   {
-    step: "Risk Definition",
+    step: "Risk Definition(1hr TimeFrame)",
     checks: [
       "Kill Zone = Recent Newyork",
       "SL beyond Second Newyork",
@@ -27,7 +27,7 @@ const nySessionChecklist = [
     ],
   },
   {
-    step: "Lower TF Confirmation",
+    step: "Lower TF Confirmation (15min/5min)",
     checks: [
       "Break block inside Discount Zone (15min->Simple)/5min->Aggresive)",
       "OB Retest",
@@ -36,10 +36,26 @@ const nySessionChecklist = [
   },
   {
     step: (
-      <span className="flex items-center gap-2">
-        <Crosshair className="w-5 h-5 text-red-600" />
-        Execution & Targets (Sniper Concept)
-      </span>
+      <span className="flex items-center gap-3">
+  <Crosshair className="w-5 h-5 text-red-600" />
+
+  <span className="flex items-center gap-2">
+    <span className="font-semibold text-gray-800">
+      Execution & Targets (Sniper Concept)
+    </span>
+
+    {/* Entry badge */}
+    <span
+      title="Entry (primary)"
+      className="ml-2 inline-flex items-center gap-1 px-2 py-0.5 bg-green-100 text-green-800 text-xs rounded-full"
+    >
+      <span className="text-sm">🎯</span>
+      <span>Entry</span>
+    </span>
+
+   
+  </span>
+</span>
     ),
     checks: [
       "Entry = Breaker Block (BOS)--->(Green=Buys & Red=Sells)",
