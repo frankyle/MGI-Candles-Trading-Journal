@@ -112,17 +112,17 @@ const TradeForm = ({
             onChange={(e) => onImageChange(e, "profitImage")}
           />
           <ImageUploadField
-            label="Trader Idea 05:00–08:00"
+            label="Trader Idea One(1)"
             value={form.traderIdeaMorning}
             onChange={(e) => onImageChange(e, "traderIdeaMorning")}
           />
           <ImageUploadField
-            label="Trader Idea 12:00–14:00"
+            label="Trader Idea Two(2)"
             value={form.traderIdeaNoon}
             onChange={(e) => onImageChange(e, "traderIdeaNoon")}
           />
           <ImageUploadField
-            label="Trader Idea 16:00–18:00"
+            label="Trader Idea Three(3)"
             value={form.traderIdeaEvening}
             onChange={(e) => onImageChange(e, "traderIdeaEvening")}
           />
