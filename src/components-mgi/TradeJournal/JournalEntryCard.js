@@ -53,8 +53,7 @@ const JournalEntryCard = ({ entry, index, onEdit, onDelete }) => {
         <p><strong>Date:</strong> {formatDate(entry.date)}</p>
         <p><strong>Time:</strong> {entry.time}</p>
         <p><strong>Session:</strong> <span className="text-indigo-700 font-medium">{entry.session}</span></p>
-        <p className="sm:col-span-2"><strong>Emotions:</strong> {entry.emotions.join(', ') || 'None'}</p>
-      </div>
+        </div>
 
       {/* Trade Images */}
       <div className="flex overflow-x-auto space-x-4 mt-4 pb-2">
@@ -89,7 +88,7 @@ const JournalEntryCard = ({ entry, index, onEdit, onDelete }) => {
 
       {showChecklist && (
         <div className="mt-4">
-          <EmotionalChecklist /> {/* ✅ show your checklist here */}
+         <EmotionalChecklist emotionalKey={`emotional-${entry.id || index}`} /> 
         </div>
       )}
 

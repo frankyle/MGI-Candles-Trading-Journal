@@ -1,7 +1,12 @@
 import React, { useState, useEffect } from "react";
 
-const EmotionalChecklist = ({ pair }) => {
-  const [entries, setEntries] = useState([]);
+const EmotionalChecklist = ({ entryId }) => {
+  // ✅ use entryId to build a unique storage key
+  const storageKey = `emotionalJournal_${entryId}`;
+
+  const [entries, setEntries] = useState(() => {
+    return JSON.parse(localStorage.getItem(storageKey)) || [];
+  });
   const [showChecklist, setShowChecklist] = useState(false);
 
   const checklist = {
@@ -56,9 +61,7 @@ const EmotionalChecklist = ({ pair }) => {
     outcome: "",
   });
 
-  const storageKey = `emotionalJournal_${pair}`;
-
-  // Load from localStorage on mount
+  // ✅ Load saved entries when entryId changes
   useEffect(() => {
     const savedEntries = localStorage.getItem(storageKey);
     if (savedEntries) {
@@ -66,7 +69,7 @@ const EmotionalChecklist = ({ pair }) => {
     }
   }, [storageKey]);
 
-  // Save entries to localStorage whenever it changes
+  // ✅ Save whenever entries change
   useEffect(() => {
     localStorage.setItem(storageKey, JSON.stringify(entries));
   }, [entries, storageKey]);
@@ -80,18 +83,14 @@ const EmotionalChecklist = ({ pair }) => {
     setSelected({ ...selected, [stage]: newSelection });
   };
 
-  // Calculate EI score
   const calculateScore = (entry) => {
     let goodCount = 0;
     let badCount = 0;
 
     ["before", "during", "after"].forEach((stage) => {
       entry[stage].forEach((item) => {
-        if (checklist[stage].good.includes(item)) {
-          goodCount++;
-        } else if (checklist[stage].bad.includes(item)) {
-          badCount++;
-        }
+        if (checklist[stage].good.includes(item)) goodCount++;
+        if (checklist[stage].bad.includes(item)) badCount++;
       });
     });
 
@@ -115,7 +114,6 @@ const EmotionalChecklist = ({ pair }) => {
     setShowChecklist(false);
   };
 
-  // Delete/reset a single entry
   const handleDelete = (index) => {
     const updatedEntries = entries.filter((_, i) => i !== index);
     setEntries(updatedEntries);
@@ -130,7 +128,7 @@ const EmotionalChecklist = ({ pair }) => {
   return (
     <div className="p-6 max-w-6xl mx-auto">
       <h2 className="text-2xl font-bold mb-4 text-center">
-        🧠 Emotional Intelligence Journal - {pair}
+        🧠 Emotional Intelligence Journal
       </h2>
 
       {/* Toggle Button */}
@@ -215,7 +213,7 @@ const EmotionalChecklist = ({ pair }) => {
       )}
 
       {/* Journal Table */}
-      <h3 className="text-xl font-semibold mt-6 mb-2">📊 {pair} Journal</h3>
+      <h3 className="text-xl font-semibold mt-6 mb-2">📊 Emotional Journal</h3>
       <table className="w-full border-collapse border border-gray-300 text-sm">
         <thead>
           <tr className="bg-gray-100">
