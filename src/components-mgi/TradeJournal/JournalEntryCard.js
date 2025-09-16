@@ -72,9 +72,9 @@ const JournalEntryCard = ({ entry, index, onEdit, onDelete }) => {
 
       {showTraderIdeas && (
         <div className="flex overflow-x-auto space-x-4 mt-4 pb-2">
-          {entry.traderIdeaMorning && <ImageCard label="Trader Idea Morning" src={entry.traderIdeaMorning} onClick={() => openModal(entry.traderIdeaMorning, "Trader Idea Morning")} />}
-          {entry.traderIdeaNoon && <ImageCard label="Trader Idea Noon" src={entry.traderIdeaNoon} onClick={() => openModal(entry.traderIdeaNoon, "Trader Idea Noon")} />}
-          {entry.traderIdeaEvening && <ImageCard label="Trader Idea Evening" src={entry.traderIdeaEvening} onClick={() => openModal(entry.traderIdeaEvening, "Trader Idea Evening")} />}
+          {entry.traderIdeaMorning && <ImageCard label="Trader Idea One(1)" src={entry.traderIdeaMorning} onClick={() => openModal(entry.traderIdeaMorning, "Trader Idea One(1)")} />}
+          {entry.traderIdeaNoon && <ImageCard label="Trader Idea Two(2)" src={entry.traderIdeaNoon} onClick={() => openModal(entry.traderIdeaNoon, "Trader Idea Two(2)")} />}
+          {entry.traderIdeaEvening && <ImageCard label="Trader Idea Three(3)" src={entry.traderIdeaEvening} onClick={() => openModal(entry.traderIdeaEvening, "Trader Idea Three(3)")} />}
         </div>
       )}
 

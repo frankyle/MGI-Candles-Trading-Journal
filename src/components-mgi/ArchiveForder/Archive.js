@@ -18,32 +18,25 @@ const Archive = () => {
     const data =
       JSON.parse(localStorage.getItem("archivedJournalEntries")) || [];
 
-    // 🔑 Enrich each entry with checklist & emotional data from localStorage
     const enriched = data.map((entry) => {
       const checklist =
         JSON.parse(localStorage.getItem(`checklist_entry_${entry.id}`)) || null;
 
       const emotional =
-        JSON.parse(localStorage.getItem(`emotional-${entry.id}`)) || [];
+        JSON.parse(localStorage.getItem(`emotionalJournal_${entry.pair}`)) || [];
 
-      return {
-        ...entry,
-        checklist,
-        emotional,
-      };
+      return { ...entry, checklist, emotional };
     });
 
     setArchivedEntries(enriched);
   }, []);
 
-  // ✅ Delete one entry
   const handleDelete = (index) => {
     const updated = archivedEntries.filter((_, i) => i !== index);
     setArchivedEntries(updated);
     localStorage.setItem("archivedJournalEntries", JSON.stringify(updated));
   };
 
-  // ✅ Clear all entries
   const handleClearAll = () => {
     if (window.confirm("Are you sure you want to clear ALL archived entries?")) {
       setArchivedEntries([]);
@@ -52,134 +45,134 @@ const Archive = () => {
   };
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">📦 Archived Journal Entries</h1>
+    <div className="p-6 max-w-4xl mx-auto">
+      {/* Header */}
+      <div className="flex justify-between items-center mb-10">
+        <h1 className="text-3xl font-extrabold tracking-tight text-gray-800">
+          📦 Archived Journal Entries
+        </h1>
 
         {archivedEntries.length > 0 && (
           <button
             onClick={handleClearAll}
-            className="px-4 py-2 bg-red-700 text-white rounded-md hover:bg-red-800"
+            className="px-4 py-2 bg-red-700 text-white rounded-lg shadow hover:bg-red-800"
           >
-            Clear All Archives
+            Clear All
           </button>
         )}
       </div>
 
+      {/* Empty State */}
       {archivedEntries.length === 0 ? (
-        <p>No archived entries yet.</p>
+        <p className="text-gray-600 text-center italic">
+          No archived entries yet. Start journaling your trades to see them here.
+        </p>
       ) : (
         archivedEntries.map((entry, i) => (
-          <div
+          <article
             key={i}
-            className="mb-8 p-6 border rounded-xl shadow-sm bg-white"
+            className="mb-12 p-6 rounded-2xl shadow-lg bg-white border border-gray-200"
           >
-            {/* Details */}
-            <div className="grid sm:grid-cols-2 gap-4 mb-4">
-              <p>
-                <strong>Pair:</strong> {entry.pair}
+            {/* Title / Header */}
+            <header className="mb-6">
+              <h2 className="text-xl font-bold text-gray-900">
+                {entry.pair} — {entry.type}
+              </h2>
+              <p className="text-sm text-gray-500">
+                {formatDate(entry.date)} • {entry.time} • {entry.session}
               </p>
-              <p>
-                <strong>Type:</strong> {entry.type}
-              </p>
-              <p>
-                <strong>Date:</strong> {formatDate(entry.date)}
-              </p>
-              <p>
-                <strong>Time:</strong> {entry.time}
-              </p>
-              <p>
-                <strong>Session:</strong> {entry.session}
-              </p>
-            </div>
+            </header>
 
-            {/* Images */}
-            <div className="flex overflow-x-auto space-x-4 mt-4 pb-2">
+            {/* Images Section */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
               {entry.setupImage && (
                 <img
                   src={entry.setupImage}
                   alt="Setup"
-                  className="w-40 rounded-md"
+                  className="w-full h-40 object-cover rounded-lg shadow"
                 />
               )}
               {entry.entryImage && (
                 <img
                   src={entry.entryImage}
                   alt="Entry"
-                  className="w-40 rounded-md"
+                  className="w-full h-40 object-cover rounded-lg shadow"
                 />
               )}
               {entry.profitImage && (
                 <img
                   src={entry.profitImage}
                   alt="Profit"
-                  className="w-40 rounded-md"
+                  className="w-full h-40 object-cover rounded-lg shadow"
                 />
               )}
             </div>
 
-            {/* Journal Checklist Summary */}
-            {entry.checklist && (
-              <div className="mt-6">
-                <h2 className="font-bold text-lg mb-2">📋 Journal Checklist</h2>
-                <p>
-                  <strong>Final Decision:</strong>{" "}
-                  {entry.checklist.finalDecision || "N/A"}
-                </p>
-                <p>
-                  <strong>Checked Items:</strong>
-                </p>
-                <ul className="list-disc ml-6 text-sm">
-                  {Object.keys(entry.checklist.checked || {})
-                    .filter((k) => entry.checklist.checked[k])
-                    .map((item, idx) => (
-                      <li key={idx}>{item}</li>
-                    ))}
-                </ul>
-              </div>
-            )}
+            {/* Checklist + Emotional Intelligence Side by Side */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              {/* Checklist */}
+              {entry.checklist && (
+                <section >
+                  <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                    📋 Journal Checklist
+                  </h3>
+                  <p className="mb-2">
+                    <strong>Final Decision:</strong>{" "}
+                    {entry.checklist.finalDecision || "N/A"}
+                  </p>
+                  <ul className="list-disc ml-6 text-sm text-gray-700">
+                    {Object.keys(entry.checklist.checked || {})
+                      .filter((k) => entry.checklist.checked[k])
+                      .map((item, idx) => (
+                        <li key={idx}>{item}</li>
+                      ))}
+                  </ul>
+                </section>
+              )}
 
-            {/* Emotional Checklist Summary */}
-            {entry.emotional && entry.emotional.length > 0 && (
-              <div className="mt-6">
-                <h2 className="font-bold text-lg mb-2">
-                  🧠 Emotional Intelligence
-                </h2>
-                {entry.emotional.map((emo, idx) => (
-                  <div
-                    key={idx}
-                    className="mb-4 p-3 border rounded-lg bg-gray-50"
-                  >
-                    <p>
-                      <strong>Before:</strong> {emo.before.join(", ")}
-                    </p>
-                    <p>
-                      <strong>During:</strong> {emo.during.join(", ")}
-                    </p>
-                    <p>
-                      <strong>After:</strong> {emo.after.join(", ")}
-                    </p>
-                    <p>
-                      <strong>Outcome:</strong> {emo.outcome}
-                    </p>
-                    <p>
-                      <strong>EI Score:</strong> {emo.score}%
-                    </p>
-                  </div>
-                ))}
-              </div>
-            )}
+              {/* Emotional Intelligence */}
+              {entry.emotional && entry.emotional.length > 0 && (
+                <section>
+                  <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                    🧠 Emotional Intelligence Review
+                  </h3>
+                  {entry.emotional.map((emo, idx) => (
+                    <div
+                      key={idx}
+                      className="mb-4 p-4 border border-gray-200 rounded-xl bg-gray-50"
+                    >
+                      <p>
+                        <strong>Before:</strong> {emo.before.join(", ")}
+                      </p>
+                      <p>
+                        <strong>During:</strong> {emo.during.join(", ")}
+                      </p>
+                      <p>
+                        <strong>After:</strong> {emo.after.join(", ")}
+                      </p>
+                      <p>
+                        <strong>Outcome:</strong> {emo.outcome}
+                      </p>
+                      <p>
+                        <strong>EI Score:</strong>{" "}
+                        <span className="font-semibold">{emo.score}%</span>
+                      </p>
+                    </div>
+                  ))}
+                </section>
+              )}
+            </div>
 
-            {/* ✅ Delete Button */}
-            <div className="mt-6">
+            {/* Footer Actions */}
+            <footer className="flex justify-end">
               <button
                 onClick={() => handleDelete(i)}
-                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+                className="px-4 py-2 bg-red-600 text-white rounded-lg shadow hover:bg-red-700"
               >
-                Delete from Archive
+                Delete Entry
               </button>
-            </div>
-          </div>
+            </footer>
+          </article>
         ))
       )}
     </div>
