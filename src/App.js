@@ -4,10 +4,11 @@ import Header from './components-mgi/Header';
 import TradingJournalForm from './components-mgi/TradeJournal/TradingJournalForm';
 import RiskManagement from './components-mgi/RiskManagement/RiskManagement';
 import FundedAccount from './components-mgi/FundedAccount/FundedAccount';
-import ArchivedTradesView from './components-mgi/ArchiveForder/ArchivedTradesView';
+// import ArchivedTradesView from './components-mgi/ArchiveForder/ArchivedTradesView';
 import Homepage from './components-mgi/Home/Homepage';
 // import Membership from './components-mgi/Membership/Membership';
 import ContactUs from './components-mgi/Home/ContactUs';
+import Archive from './components-mgi/ArchiveForder/Archive';
 
 function App() {
   return (
@@ -20,7 +21,8 @@ function App() {
           <Route path="/riskmanagement" element={<RiskManagement />} />
           <Route path="/riskmanagementfunded" element={<FundedAccount />} />
           {/* <Route path="/membership" element={<Membership />} /> */}
-          <Route path="/journal" element={<ArchivedTradesView />} />
+          {/* <Route path="/journal" element={<ArchivedTradesView />} /> */}
+          <Route path="/journal" element={<Archive />} />
           <Route path="/contactus" element={<ContactUs />} />
         </Routes>
       </div>

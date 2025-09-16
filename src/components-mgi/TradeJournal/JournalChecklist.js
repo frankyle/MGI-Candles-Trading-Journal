@@ -2,7 +2,6 @@ import { Crosshair } from "lucide-react";
 import React, { useState, useEffect } from "react";
 
 const nySessionChecklist = [
-  
   {
     step: "Swing Range & Discount Zone (4hr Timeframe)",
     checks: [
@@ -37,25 +36,20 @@ const nySessionChecklist = [
   {
     step: (
       <span className="flex items-center gap-3">
-  <Crosshair className="w-5 h-5 text-red-600" />
-
-  <span className="flex items-center gap-2">
-    <span className="font-semibold text-gray-800">
-      Execution & Targets (Sniper Concept)
-    </span>
-
-    {/* Entry badge */}
-    <span
-      title="Entry (primary)"
-      className="ml-2 inline-flex items-center gap-1 px-2 py-0.5 bg-green-100 text-green-800 text-xs rounded-full"
-    >
-      <span className="text-sm">🎯</span>
-      <span>Entry</span>
-    </span>
-
-   
-  </span>
-</span>
+        <Crosshair className="w-5 h-5 text-red-600" />
+        <span className="flex items-center gap-2">
+          <span className="font-semibold text-gray-800">
+            Execution & Targets (Sniper Concept)
+          </span>
+          <span
+            title="Entry (primary)"
+            className="ml-2 inline-flex items-center gap-1 px-2 py-0.5 bg-green-100 text-green-800 text-xs rounded-full"
+          >
+            <span className="text-sm">🎯</span>
+            <span>Entry</span>
+          </span>
+        </span>
+      </span>
     ),
     checks: [
       "Entry = Breaker Block (BOS)--->(Green=Buys & Red=Sells)",
@@ -67,8 +61,17 @@ const nySessionChecklist = [
 ];
 
 const amdChecklist = [
-  { step: "Accumulation", checks: ["Asian Session created liquidity", "(Asian + London) Session  created liquidity"] },
-  { step: "Manipulation", checks: ["Liquidity grab by LONDON", "Liquidity grab by LONDON & NEWYORK"] },
+  {
+    step: "Accumulation",
+    checks: [
+      "Asian Session created liquidity",
+      "(Asian + London) Session  created liquidity",
+    ],
+  },
+  {
+    step: "Manipulation",
+    checks: ["Liquidity grab by LONDON", "Liquidity grab by LONDON & NEWYORK"],
+  },
   { step: "Distribution", checks: ["Mitigated FVG", "FVG", "Engulfing Candle"] },
 ];
 
@@ -95,7 +98,7 @@ const JournalChecklist = ({ entryId }) => {
     "Distribution",
   ];
 
-  // Load saved checklist
+  // Load saved checklist from localStorage
   useEffect(() => {
     const savedData = localStorage.getItem(`checklist_entry_${entryId}`);
     if (savedData) {
@@ -105,7 +108,7 @@ const JournalChecklist = ({ entryId }) => {
     }
   }, [entryId]);
 
-  // Save to localStorage
+  // Save to localStorage whenever checked/finalDecision changes
   useEffect(() => {
     localStorage.setItem(
       `checklist_entry_${entryId}`,
@@ -120,10 +123,20 @@ const JournalChecklist = ({ entryId }) => {
     }));
   };
 
-  const completedCoreSteps = coreSteps.filter((step) => {
-    const nyChecks = nySessionChecklist.find((s) => s.step === step)?.checks || [];
-    const amdChecks = amdChecklist.find((s) => s.step === step)?.checks || [];
-    const allChecks = [...nyChecks, ...amdChecks];
+  // Count how many core steps are completed (substring match instead of exact match)
+  const completedCoreSteps = coreSteps.filter((coreStep) => {
+    const nySection = nySessionChecklist.find((s) =>
+      typeof s.step === "string" ? s.step.includes(coreStep) : false
+    );
+    const amdSection = amdChecklist.find((s) =>
+      typeof s.step === "string" ? s.step.includes(coreStep) : false
+    );
+
+    const allChecks = [
+      ...(nySection?.checks || []),
+      ...(amdSection?.checks || []),
+    ];
+
     return allChecks.some((c) => checked[c]);
   }).length;
 
@@ -163,12 +176,19 @@ const JournalChecklist = ({ entryId }) => {
 
       {showChecklist && (
         <>
+          {/* Core progress & status */}
           <div className="mb-6 p-4 bg-gray-100 rounded-xl border border-gray-300">
             <p className="font-semibold text-lg">
               Core Steps Completed: {completedCoreSteps} / {coreSteps.length}
             </p>
-            <p className={`mt-2 text-xl font-bold ${isReady ? "text-green-600" : "text-red-600"}`}>
-              {isReady ? "✅ READY to Enter Trade" : "❌ NOT READY (Need at least 6)"}
+            <p
+              className={`mt-2 text-xl font-bold ${
+                isReady ? "text-green-600" : "text-red-600"
+              }`}
+            >
+              {isReady
+                ? "✅ READY to Enter Trade"
+                : "❌ NOT READY (Need at least 6)"}
             </p>
 
             {finalDecision && (
@@ -192,6 +212,7 @@ const JournalChecklist = ({ entryId }) => {
             )}
           </div>
 
+          {/* NY Checklist */}
           <h1 className="text-2xl font-bold mb-4">📋 NY Session Checklist</h1>
           {nySessionChecklist.map((section, idx) => (
             <div key={idx} className="mb-4">
@@ -210,7 +231,10 @@ const JournalChecklist = ({ entryId }) => {
             </div>
           ))}
 
-          <h1 className="text-2xl font-bold mt-8 mb-4">📊 AMD Concept Checklist</h1>
+          {/* AMD Checklist */}
+          <h1 className="text-2xl font-bold mt-8 mb-4">
+            📊 AMD Concept Checklist
+          </h1>
           {amdChecklist.map((section, idx) => (
             <div key={idx} className="mb-4">
               <h2 className="font-semibold text-lg mb-2">{section.step}</h2>
@@ -228,6 +252,7 @@ const JournalChecklist = ({ entryId }) => {
             </div>
           ))}
 
+          {/* Probability Boosters */}
           <h1 className="text-2xl font-bold mt-8 mb-4">🎯 Probability Boosters</h1>
           {probabilityBoosters.map((boost, i) => (
             <label key={i} className="flex items-center gap-2 mb-1">
@@ -244,7 +269,9 @@ const JournalChecklist = ({ entryId }) => {
           <button
             onClick={evaluateDecision}
             className={`mt-6 px-6 py-2 rounded-xl font-semibold transition ${
-              isReady ? "bg-gray-900 text-white hover:bg-gray-800" : "bg-gray-400 text-white"
+              isReady
+                ? "bg-gray-900 text-white hover:bg-gray-800"
+                : "bg-gray-400 text-white"
             }`}
           >
             ✅ Evaluate Setup
