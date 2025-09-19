@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import JournalChecklist from './JournalChecklist';
-import EmotionalChecklist from './EmotionalChecklist'; // ✅ import here
 
 // Format date for readability
 const formatDate = (dateStr) => {
@@ -17,7 +16,6 @@ const formatDate = (dateStr) => {
 const JournalEntryCard = ({ entry, index, onEdit, onDelete }) => {
   const checklistKey = `checklist-${index}`;
   const [showTraderIdeas, setShowTraderIdeas] = useState(false);
-  const [showChecklist, setShowChecklist] = useState(false); // ✅ new toggle
   const [modalImage, setModalImage] = useState(null);
   const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 768);
 
@@ -53,7 +51,7 @@ const JournalEntryCard = ({ entry, index, onEdit, onDelete }) => {
         <p><strong>Date:</strong> {formatDate(entry.date)}</p>
         <p><strong>Time:</strong> {entry.time}</p>
         <p><strong>Session:</strong> <span className="text-indigo-700 font-medium">{entry.session}</span></p>
-        </div>
+      </div>
 
       {/* Trade Images */}
       <div className="flex overflow-x-auto space-x-4 mt-4 pb-2">
@@ -77,21 +75,6 @@ const JournalEntryCard = ({ entry, index, onEdit, onDelete }) => {
           {entry.traderIdeaEvening && <ImageCard label="Trader Idea Three(3)" src={entry.traderIdeaEvening} onClick={() => openModal(entry.traderIdeaEvening, "Trader Idea Three(3)")} />}
         </div>
       )}
-
-      {/* Emotional Intelligence Checklist */}
-      <button
-        onClick={() => setShowChecklist((prev) => !prev)}
-        className="mt-4 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
-      >
-        {showChecklist ? 'Hide Emotional Intelligence' : 'Show Emotional Intelligence'}
-      </button>
-
-      {showChecklist && (
-        <div className="mt-4">
-         <EmotionalChecklist emotionalKey={`emotional-${entry.id || index}`} /> 
-        </div>
-      )}
-
 
       {/* Checklist (separated component) */}
       <JournalChecklist checklistKey={checklistKey} />
