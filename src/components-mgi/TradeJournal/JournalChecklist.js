@@ -1,85 +1,67 @@
-import { Crosshair } from "lucide-react";
 import React, { useState, useEffect } from "react";
 
 const nySessionChecklist = [
   {
-    step: "Swing Range & Discount Zone (4hr Timeframe)",
+    step: "Step 1: Previous Day NewYork inside Fib Discount Zone (Mandatory)",
     checks: [
-      "Fib retracement at 50–61.8%",
-      "Fib retracement at 61.8-75%",
-      "Fib retracement at 75–100%",
+      "Previous Day NewYork low inside Fib Discount Zone (50% – 100%) → Buy setup",
+      "Previous Day NewYork high inside Fib Premium Zone (50% – 100%) → Sell setup",
     ],
+    mandatory: true,
   },
   {
-    step: "Macro Filter(1hr TimeFrame)",
-    checks: [
-      "BUY → Previous NY low NOT broken (1.Old & 2.New)",
-      "SELL → Previous NY high NOT broken (1.Old & 2.New)",
-    ],
+    step: "Step 2: Asian Accumulation (Mandatory)",
+    checks: ["Asian Session created liquidity"],
+    mandatory: true,
   },
   {
-    step: "Risk Definition(1hr TimeFrame)",
+    step: "Step 3: Liquidity Reference (PDL / PDH / PWL / PWH) (Mandatory - pick 1 or 2)",
     checks: [
-      "Kill Zone = Recent Newyork",
-      "SL beyond Second Newyork",
-      "If Kill Zone broken → INVALID",
+      "Previous Day Low (PDL)",
+      "Previous Day High (PDH)",
+      "Previous Week Low (PWL)",
+      "Previous Week High (PWH)",
     ],
+    mandatory: true,
   },
   {
-    step: "Lower TF Confirmation (15min/5min)",
+    step: "Step 4: Manipulation (Mandatory)",
     checks: [
-      "Break block inside Discount Zone (15min->Simple)/5min->Aggresive)",
-      "OB Retest",
-      "FVG confluence",
+      "Liquidity grab by LONDON",
+      "Liquidity grab by LONDON & NEWYORK (possible swing point)",
     ],
+    mandatory: true,
   },
   {
-    step: (
-      <span className="flex items-center gap-3">
-        <Crosshair className="w-5 h-5 text-red-600" />
-        <span className="flex items-center gap-2">
-          <span className="font-semibold text-gray-800">
-            Execution & Targets (Sniper Concept)
-          </span>
-          <span
-            title="Entry (primary)"
-            className="ml-2 inline-flex items-center gap-1 px-2 py-0.5 bg-green-100 text-green-800 text-xs rounded-full"
-          >
-            <span className="text-sm">🎯</span>
-            <span>Entry</span>
-          </span>
-        </span>
-      </span>
-    ),
-    checks: [
-      "Entry = Breaker Block (BOS)--->(Green=Buys & Red=Sells)",
-      "SL = Below Newyork low (BUY) / Above Newyork high (SELL)",
-      "TP1 = 100% Fib",
-      "TP2 = Extension (new HH/LL)",
-    ],
-  },
-];
-
-const amdChecklist = [
-  {
-    step: "Accumulation",
-    checks: [
-      "Asian Session created liquidity",
-      "(Asian + London) Session  created liquidity",
-    ],
+    step: "Step 5: Order Block / FVG (Optional - 1 or both)",
+    checks: ["OB Formed in 15min", "FVG Formed (5min)"],
+    mandatory: false,
   },
   {
-    step: "Manipulation",
-    checks: ["Liquidity grab by LONDON", "Liquidity grab by LONDON & NEWYORK"],
+    step: "Step 6: Breaker Block (Mandatory)",
+    checks: ["Breaker Block (Green for Buys / Red for Sells in 15min)"],
+    mandatory: true,
   },
-  { step: "Distribution", checks: ["Mitigated FVG", "FVG", "Engulfing Candle"] },
-];
-
-const probabilityBoosters = [
-  "Weekly Open",
-  "Daily Open",
-  "Previous Daily High/Low",
-  "Previous Weekly High/Low",
+  {
+    step: "Step 7: NewYork Continuation / Distribution (Mandatory)",
+    checks: ["NY Continuation / Distribution"],
+    mandatory: true,
+  },
+  {
+    step: "Step 8: Daily Open (Optional)",
+    checks: ["Daily Open"],
+    mandatory: false,
+  },
+  {
+    step: "Step 9: Weekly Open (Optional)",
+    checks: ["Weekly Open"],
+    mandatory: false,
+  },
+  {
+    step: "Step 10: Monthly Open (Optional)",
+    checks: ["Monthly Open"],
+    mandatory: false,
+  },
 ];
 
 const emotionalChecklist = {
@@ -133,17 +115,6 @@ const JournalChecklist = ({ entryId }) => {
   const [emotionalScore, setEmotionalScore] = useState(null);
   const [showChecklist, setShowChecklist] = useState(false);
 
-  const coreSteps = [
-    "Macro Filter",
-    "Swing Range & Discount Zone",
-    "Risk Definition",
-    "Lower TF Confirmation",
-    "Execution & Targets",
-    "Accumulation",
-    "Manipulation",
-    "Distribution",
-  ];
-
   // Load saved checklist
   useEffect(() => {
     const savedData = localStorage.getItem(`checklist_entry_${entryId}`);
@@ -170,44 +141,39 @@ const JournalChecklist = ({ entryId }) => {
     }));
   };
 
-  const completedCoreSteps = coreSteps.filter((coreStep) => {
-    const nySection = nySessionChecklist.find((s) =>
-      typeof s.step === "string" ? s.step.includes(coreStep) : false
-    );
-    const amdSection = amdChecklist.find((s) =>
-      typeof s.step === "string" ? s.step.includes(coreStep) : false
-    );
-
-    const allChecks = [
-      ...(nySection?.checks || []),
-      ...(amdSection?.checks || []),
-    ];
-
-    return allChecks.some((c) => checked[c]);
-  }).length;
-
-  const minRequired = 6;
-  const isReady = completedCoreSteps >= minRequired;
-
+  // ✅ Evaluate trade logic
   const evaluateDecision = () => {
-    if (!isReady) {
-      setFinalDecision("⚠️ You need at least 6 core steps before evaluating.");
+    // 1. Ensure Steps 1–7 are all completed
+    const mandatorySteps = nySessionChecklist.filter((s) => s.mandatory && parseInt(s.step.split(" ")[1]) <= 7);
+
+    const allMandatoryCompleted = mandatorySteps.every((step) =>
+      step.checks.some((c) => checked[c])
+    );
+
+    if (!allMandatoryCompleted) {
+      setFinalDecision("❌ Not all mandatory steps completed (1–7 required).");
       return;
     }
 
-    const buySignals = Object.keys(checked).filter(
-      (c) => checked[c] && c.includes("BUY")
-    ).length;
-    const sellSignals = Object.keys(checked).filter(
-      (c) => checked[c] && c.includes("SELL")
-    ).length;
+    // 2. Determine direction from Step 1
+    const buySelected = checked["Previous Day NewYork low inside Fib Discount Zone (50% – 100%) → Buy setup"];
+    const sellSelected = checked["Previous Day NewYork high inside Fib Premium Zone (50% – 100%) → Sell setup"];
 
-    if (buySignals > sellSignals) {
-      setFinalDecision("✅ Likely BUY Setup");
-    } else if (sellSignals > buySignals) {
-      setFinalDecision("🔻 Likely SELL Setup");
+    if (buySelected && !sellSelected) {
+      // 3. Risk logic
+      let risk = 1;
+      if (checked["Daily Open"]) risk = 2;
+      if (checked["Weekly Open"] || checked["Monthly Open"]) risk = 3;
+
+      setFinalDecision(`✅ Enter BUY with ${risk}% risk`);
+    } else if (sellSelected && !buySelected) {
+      let risk = 1;
+      if (checked["Daily Open"]) risk = 2;
+      if (checked["Weekly Open"] || checked["Monthly Open"]) risk = 3;
+
+      setFinalDecision(`✅ Enter SELL with ${risk}% risk`);
     } else {
-      setFinalDecision("⚖️ No clear direction yet");
+      setFinalDecision("⚖️ No clear direction from Step 1");
     }
   };
 
@@ -239,41 +205,6 @@ const JournalChecklist = ({ entryId }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Journal Section */}
           <div>
-            <div className="mb-6 p-4 bg-gray-100 rounded-xl border border-gray-300">
-              <p className="font-semibold text-lg">
-                Core Steps Completed: {completedCoreSteps} / {coreSteps.length}
-              </p>
-              <p
-                className={`mt-2 text-xl font-bold ${
-                  isReady ? "text-green-600" : "text-red-600"
-                }`}
-              >
-                {isReady
-                  ? "✅ READY to Enter Trade"
-                  : "❌ NOT READY (Need at least 6)"}
-              </p>
-
-              {finalDecision && (
-                <div
-                  className={`mt-4 p-4 rounded-xl border text-xl font-bold flex items-center gap-3 ${
-                    finalDecision.includes("BUY")
-                      ? "bg-green-50 border-green-300 text-blue-900"
-                      : finalDecision.includes("SELL")
-                      ? "bg-red-50 border-red-300 text-red-900"
-                      : finalDecision.includes("No clear")
-                      ? "bg-blue-50 border-blue-300 text-blue-800"
-                      : "bg-yellow-50 border-yellow-300 text-yellow-800"
-                  }`}
-                >
-                  {finalDecision.includes("BUY") && <span>📈</span>}
-                  {finalDecision.includes("SELL") && <span>📉</span>}
-                  {finalDecision.includes("No clear") && <span>⚖️</span>}
-                  {finalDecision.includes("⚠️") && <span>⚠️</span>}
-                  <span>{finalDecision}</span>
-                </div>
-              )}
-            </div>
-
             <h1 className="text-2xl font-bold mb-4">📋 NY Session Checklist</h1>
             {nySessionChecklist.map((section, idx) => (
               <div key={idx} className="mb-4">
@@ -292,53 +223,33 @@ const JournalChecklist = ({ entryId }) => {
               </div>
             ))}
 
-            <h1 className="text-2xl font-bold mt-8 mb-4">📊 AMD Concept Checklist</h1>
-            {amdChecklist.map((section, idx) => (
-              <div key={idx} className="mb-4">
-                <h2 className="font-semibold text-lg mb-2">{section.step}</h2>
-                {section.checks.map((check, i) => (
-                  <label key={i} className="flex items-center gap-2 mb-1">
-                    <input
-                      type="checkbox"
-                      className="accent-gray-800"
-                      checked={checked[check] || false}
-                      onChange={() => handleCheck(check)}
-                    />
-                    {check}
-                  </label>
-                ))}
-              </div>
-            ))}
-
-            <h1 className="text-2xl font-bold mt-8 mb-4">🎯 Probability Boosters</h1>
-            {probabilityBoosters.map((boost, i) => (
-              <label key={i} className="flex items-center gap-2 mb-1">
-                <input
-                  type="checkbox"
-                  className="accent-gray-800"
-                  checked={checked[boost] || false}
-                  onChange={() => handleCheck(boost)}
-                />
-                {boost}
-              </label>
-            ))}
-
             <button
               onClick={evaluateDecision}
-              className={`mt-6 px-6 py-2 rounded-xl font-semibold transition ${
-                isReady
-                  ? "bg-gray-900 text-white hover:bg-gray-800"
-                  : "bg-gray-400 text-white"
-              }`}
+              className="mt-6 px-6 py-2 rounded-xl font-semibold transition bg-gray-900 text-white hover:bg-gray-800"
             >
-              ✅ Evaluate Trade Direction
+              ✅ Evaluate Trade Decision
             </button>
+
+            {finalDecision && (
+              <div
+                className={`mt-4 p-4 rounded-xl border text-xl font-bold flex items-center gap-3 ${
+                  finalDecision.includes("BUY")
+                    ? "bg-green-50 border-green-300 text-blue-900"
+                    : finalDecision.includes("SELL")
+                    ? "bg-red-50 border-red-300 text-red-900"
+                    : finalDecision.includes("Not all")
+                    ? "bg-yellow-50 border-yellow-300 text-yellow-800"
+                    : "bg-blue-50 border-blue-300 text-blue-800"
+                }`}
+              >
+                {finalDecision}
+              </div>
+            )}
           </div>
 
           {/* Emotional Section */}
           <div>
             <h1 className="text-2xl font-bold mb-6">🧠 Emotional Checklist</h1>
-
             {Object.entries(emotionalChecklist).map(([phase, lists]) => (
               <div key={phase} className="mb-8">
                 <h2 className="font-semibold text-lg capitalize mb-3">
