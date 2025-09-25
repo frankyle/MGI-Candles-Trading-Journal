@@ -9,6 +9,8 @@ import Homepage from './components-mgi/Home/Homepage';
 // import Membership from './components-mgi/Membership/Membership';
 import ContactUs from './components-mgi/Home/ContactUs';
 import Archive from './components-mgi/ArchiveForder/Archive';
+import SignIn from './components-mgi/Authentication/SignIn';
+import SignUp from './components-mgi/Authentication/SignUp';
 
 function App() {
   return (
@@ -24,6 +26,8 @@ function App() {
           {/* <Route path="/journal" element={<ArchivedTradesView />} /> */}
           <Route path="/journal" element={<Archive />} />
           <Route path="/contactus" element={<ContactUs />} />
+          <Route path="/signin" element={<SignIn />} />
+          <Route path="/signup" element={<SignUp />} />
         </Routes>
       </div>
     </div>

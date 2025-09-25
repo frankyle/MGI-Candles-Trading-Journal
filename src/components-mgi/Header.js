@@ -31,61 +31,61 @@ const Header = () => {
           </div>
 
           {/* Desktop Nav */}
-          <nav className="hidden md:flex space-x-6 items-center ml-12 relative">
-            <NavLink to="/" label="Home" />
-            <NavLink to="/trades" label="My Trades" />
+<nav className="hidden md:flex space-x-6 items-center ml-12 relative">
+  <NavLink to="/" label="Home" />
+  <NavLink to="/trades" label="My Trades" />
 
-            {/* Progress Dropdown */}
-            <div className="relative">
-              <button
-                onClick={toggleProgress}
-                className="flex items-center text-gray-800 hover:text-green-600 font-medium transition-colors focus:outline-none"
-              >
-                Progress <ChevronDown size={16} className="ml-1" />
-              </button>
-              {progressOpen && (
-                <div className="absolute mt-2 w-56 bg-white shadow-xl rounded-lg py-2 border border-green-100 animate-fadeIn z-50">
-                  <DropdownLink
-                    to="/riskmanagement"
-                    label="📊 Risk Management (Personal)"
-                    close={() => setProgressOpen(false)}
-                  />
-                  <DropdownLink
-                    to="/riskmanagementfunded"
-                    label="💼 Risk Management (Funded)"
-                    close={() => setProgressOpen(false)}
-                  />
-                </div>
-              )}
-            </div>
+  {/* Progress Dropdown */}
+  <div className="relative">
+    <button
+      onClick={toggleProgress}
+      className="flex items-center text-gray-800 hover:text-green-600 font-medium transition-colors focus:outline-none"
+    >
+      Progress <ChevronDown size={16} className="ml-1" />
+    </button>
+    {progressOpen && (
+      <div className="absolute mt-2 w-56 bg-white shadow-xl rounded-lg py-2 border border-green-100 animate-fadeIn z-50">
+        <DropdownLink
+          to="/riskmanagement"
+          label="📊 Risk Management (Personal)"
+          close={() => setProgressOpen(false)}
+        />
+        <DropdownLink
+          to="/riskmanagementfunded"
+          label="💼 Risk Management (Funded)"
+          close={() => setProgressOpen(false)}
+        />
+      </div>
+    )}
+  </div>
 
-            <NavLink to="/journal" label="Journal" />
-            <NavLink to="/contactus" label="Contacts" />
+  <NavLink to="/journal" label="Journal" />
+  <NavLink to="/contactus" label="Contacts" />
 
-            {!isLoggedIn ? (
-              <>
-                <Link
-                  to="/free-signals"
-                  className="bg-white px-4 py-2 rounded-full font-medium border border-green-400 text-green-700 hover:bg-green-50 shadow-sm transition"
-                >
-                  Get Free Signals
-                </Link>
-                <Link
-                  to="/signup"
-                  className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-4 py-2 rounded-full font-medium shadow-md hover:opacity-95 transition"
-                >
-                  Join Premium
-                </Link>
-              </>
-            ) : (
-              <button
-                onClick={toggleAuth}
-                className="bg-red-600 text-white px-5 py-2 rounded-full font-medium hover:bg-red-700 transition"
-              >
-                Sign Out
-              </button>
-            )}
-          </nav>
+  {!isLoggedIn ? (
+    <>
+      <Link
+        to="/signin"
+        className="bg-white px-4 py-2 rounded-full font-medium border border-green-400 text-green-700 hover:bg-green-50 shadow-sm transition"
+      >
+        Sign In
+      </Link>
+      <Link
+        to="/signup"
+        className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-4 py-2 rounded-full font-medium shadow-md hover:opacity-95 transition"
+      >
+        Sign Up
+      </Link>
+    </>
+  ) : (
+    <button
+      onClick={toggleAuth}
+      className="bg-red-600 text-white px-5 py-2 rounded-full font-medium hover:bg-red-700 transition"
+    >
+      Sign Out
+    </button>
+  )}
+</nav>
 
           {/* Mobile Menu Toggle */}
           <button
