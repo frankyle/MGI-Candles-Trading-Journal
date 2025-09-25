@@ -1,15 +1,64 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Menu, X, ChevronDown } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import logo from "../images/MGI logo.png";
+import { supabase } from "../supabaseClient"; // Import Supabase Client
 
 const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [fullName, setFullName] = useState(""); // Hali mpya kwa ajili ya jina la mtumiaji
   const [progressOpen, setProgressOpen] = useState(false);
 
-  const toggleAuth = () => setIsLoggedIn(!isLoggedIn);
+  // Tumia useEffect kuangalia hali ya mtumiaji
+  useEffect(() => {
+    // Kazi ya kuangalia mtumiaji aliyepo na kusasisha hali
+    const checkUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        setIsLoggedIn(true);
+        // Pata metadata ya mtumiaji, au tumia email kama jina halipo
+        setFullName(session.user.user_metadata?.full_name || session.user.email);
+      } else {
+        setIsLoggedIn(false);
+        setFullName("");
+      }
+    };
+
+    checkUser();
+
+    // Tumia onAuthStateChange kusikiliza mabadiliko
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        if (session) {
+          setIsLoggedIn(true);
+          setFullName(session.user.user_metadata?.full_name || session.user.email);
+        } else {
+          setIsLoggedIn(false);
+          setFullName("");
+        }
+      }
+    );
+
+    // Kazi ya kusafisha wakati component inapofungwa
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
+  }, []);
+
+  // Kazi mpya ya kumtoa mtumiaji nje
+  const handleSignOut = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      // Hali itasasishwa kiotomatiki na `onAuthStateChange`
+    } catch (error) {
+      console.error("Error signing out:", error.message);
+      alert("Error signing out: " + error.message);
+    }
+  };
+
   const toggleMobileMenu = () => setMobileMenuOpen(!mobileMenuOpen);
   const toggleProgress = () => setProgressOpen(!progressOpen);
 
@@ -31,61 +80,75 @@ const Header = () => {
           </div>
 
           {/* Desktop Nav */}
-<nav className="hidden md:flex space-x-6 items-center ml-12 relative">
-  <NavLink to="/" label="Home" />
-  <NavLink to="/trades" label="My Trades" />
+          <nav className="hidden md:flex space-x-6 items-center ml-12 relative">
+            <NavLink to="/" label="Home" />
+            <NavLink to="/trades" label="My Trades" />
 
-  {/* Progress Dropdown */}
-  <div className="relative">
-    <button
-      onClick={toggleProgress}
-      className="flex items-center text-gray-800 hover:text-green-600 font-medium transition-colors focus:outline-none"
-    >
-      Progress <ChevronDown size={16} className="ml-1" />
-    </button>
-    {progressOpen && (
-      <div className="absolute mt-2 w-56 bg-white shadow-xl rounded-lg py-2 border border-green-100 animate-fadeIn z-50">
-        <DropdownLink
-          to="/riskmanagement"
-          label="📊 Risk Management (Personal)"
-          close={() => setProgressOpen(false)}
-        />
-        <DropdownLink
-          to="/riskmanagementfunded"
-          label="💼 Risk Management (Funded)"
-          close={() => setProgressOpen(false)}
-        />
-      </div>
-    )}
-  </div>
+            {/* Progress Dropdown */}
+            <div className="relative">
+              <button
+                onClick={toggleProgress}
+                className="flex items-center text-gray-800 hover:text-green-600 font-medium transition-colors focus:outline-none"
+              >
+                Progress <ChevronDown size={16} className="ml-1" />
+              </button>
+              <AnimatePresence>
+                {progressOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    transition={{ duration: 0.2 }}
+                    className="absolute mt-2 w-56 bg-white shadow-xl rounded-lg py-2 border border-green-100 z-50"
+                  >
+                    <DropdownLink
+                      to="/riskmanagement"
+                      label="📊 Risk Management (Personal)"
+                      close={() => setProgressOpen(false)}
+                    />
+                    <DropdownLink
+                      to="/riskmanagementfunded"
+                      label="💼 Risk Management (Funded)"
+                      close={() => setProgressOpen(false)}
+                    />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
 
-  <NavLink to="/journal" label="Journal" />
-  <NavLink to="/contactus" label="Contacts" />
+            <NavLink to="/journal" label="Journal" />
+            <NavLink to="/contactus" label="Contacts" />
 
-  {!isLoggedIn ? (
-    <>
-      <Link
-        to="/signin"
-        className="bg-white px-4 py-2 rounded-full font-medium border border-green-400 text-green-700 hover:bg-green-50 shadow-sm transition"
-      >
-        Sign In
-      </Link>
-      <Link
-        to="/signup"
-        className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-4 py-2 rounded-full font-medium shadow-md hover:opacity-95 transition"
-      >
-        Sign Up
-      </Link>
-    </>
-  ) : (
-    <button
-      onClick={toggleAuth}
-      className="bg-red-600 text-white px-5 py-2 rounded-full font-medium hover:bg-red-700 transition"
-    >
-      Sign Out
-    </button>
-  )}
-</nav>
+            {/* Onyesha jina au vifungo kulingana na hali ya mtumiaji */}
+            {!isLoggedIn ? (
+              <>
+                <Link
+                  to="/signin"
+                  className="bg-white px-4 py-2 rounded-full font-medium border border-green-400 text-green-700 hover:bg-green-50 shadow-sm transition"
+                >
+                  Sign In
+                </Link>
+                <Link
+                  to="/signup"
+                  className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-4 py-2 rounded-full font-medium shadow-md hover:opacity-95 transition"
+                >
+                  Sign Up
+                </Link>
+              </>
+            ) : (
+              <div className="flex items-center space-x-3">
+                <span className="text-gray-800 font-medium whitespace-nowrap">
+                  Hi, {fullName}!
+                </span>
+                <button
+                  onClick={handleSignOut}
+                  className="bg-red-600 text-white px-5 py-2 rounded-full font-medium hover:bg-red-700 transition"
+                >
+                  Sign Out
+                </button>
+              </div>
+            )}
+          </nav>
 
           {/* Mobile Menu Toggle */}
           <button
@@ -136,17 +199,17 @@ const Header = () => {
                       to="/riskmanagement"
                       label="📊 Risk (Personal)"
                       close={() => {
-                        setMobileMenuOpen(false);
-                        setProgressOpen(false);
-                      }}
+                                setMobileMenuOpen(false);
+                                setProgressOpen(false);
+                              }}
                     />
                     <DropdownLink
                       to="/riskmanagementfunded"
                       label="💼 Risk (Funded)"
                       close={() => {
-                        setMobileMenuOpen(false);
-                        setProgressOpen(false);
-                      }}
+                                setMobileMenuOpen(false);
+                                setProgressOpen(false);
+                              }}
                     />
                   </motion.div>
                 )}
@@ -164,31 +227,39 @@ const Header = () => {
               close={() => setMobileMenuOpen(false)}
             />
 
+            {/* Onyesha jina au vifungo kwenye simu */}
             {!isLoggedIn ? (
               <>
                 <Link
-                  to="/free-signals"
+                  to="/signin"
                   className="w-full text-center block bg-white px-4 py-2 rounded-full font-medium border border-green-400 text-green-700 hover:bg-green-50 shadow-sm transition"
+                  onClick={() => setMobileMenuOpen(false)}
                 >
-                  Get Free Signals
+                  Sign In
                 </Link>
                 <Link
                   to="/signup"
                   className="w-full text-center block bg-gradient-to-r from-green-500 to-emerald-500 text-white px-4 py-2 rounded-full font-medium shadow-md hover:opacity-95 transition"
+                  onClick={() => setMobileMenuOpen(false)}
                 >
-                  Join Premium
+                  Sign Up
                 </Link>
               </>
             ) : (
-              <button
-                onClick={() => {
-                  toggleAuth();
-                  setMobileMenuOpen(false);
-                }}
-                className="w-full bg-red-600 text-white px-4 py-2 rounded-full font-medium hover:bg-red-700"
-              >
-                Sign Out
-              </button>
+              <div className="pt-3 border-t border-gray-200">
+                <span className="block text-center text-lg font-bold text-green-700 mb-3">
+                  Hi, {fullName}!
+                </span>
+                <button
+                  onClick={() => {
+                    handleSignOut();
+                    setMobileMenuOpen(false);
+                  }}
+                  className="w-full bg-red-600 text-white px-4 py-2 rounded-full font-medium hover:bg-red-700"
+                >
+                  Sign Out
+                </button>
+              </div>
             )}
           </motion.div>
         )}
