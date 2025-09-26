@@ -1,63 +1,173 @@
-import React, { useState, useEffect } from 'react';
-import RiskTradeModal from './RiskTradeModal'; // Make sure this file exists and exports the modal
-import RiskTradeCharts from './RiskTradeCharts';
+import React, { useState, useEffect } from "react";
+import { supabase } from "../../supabaseClient"; // adjust path
+import RiskTradeModal from "./RiskTradeModal";
+import RiskTradeCharts from "./RiskTradeCharts";
 
 const usdToTshRate = 2500;
 const convertUSDToTSH = (usd) => usd * usdToTshRate;
 
-// Format date mm/dd/yyyy and day of week
+// Format date and day
 const formatDateAndDay = (dateStr) => {
-  if (!dateStr) return { date: '', day: '' };
+  if (!dateStr) return { date: "", day: "" };
   const d = new Date(dateStr);
-  const date = `${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getDate()
+  const date = `${(d.getMonth() + 1).toString().padStart(2, "0")}/${d
+    .getDate()
     .toString()
-    .padStart(2, '0')}/${d.getFullYear()}`;
-  const day = d.toLocaleDateString('en-US', { weekday: 'long' });
+    .padStart(2, "0")}/${d.getFullYear()}`;
+  const day = d.toLocaleDateString("en-US", { weekday: "long" });
   return { date, day };
 };
 
-function RiskManagement() {
-  // Load saved trades from localStorage or default empty array
-  const [trades, setTrades] = useState(() => {
-    const saved = localStorage.getItem('riskTrades');
-    return saved ? JSON.parse(saved) : [];
-  });
+// Safe number formatter
+const formatNumber = (value, decimals = 2) => {
+  if (value === null || value === undefined || isNaN(value)) {
+    return "-";
+  }
+  return Number(value).toFixed(decimals);
+};
 
+function RiskManagement() {
+  const [trades, setTrades] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [editTrade, setEditTrade] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(null);
 
-  // Save trades to localStorage on every change
+  // Fetch current user once
   useEffect(() => {
-    localStorage.setItem('riskTrades', JSON.stringify(trades));
-  }, [trades]);
+    const getUser = async () => {
+      const {
+        data: { user },
+        error,
+      } = await supabase.auth.getUser();
+      if (error) {
+        console.error("Error fetching user:", error.message);
+        alert("Error fetching user: " + error.message);
+      }
+      setUser(user);
+    };
+    getUser();
+  }, []);
+
+  // Fetch trades whenever user changes
+  useEffect(() => {
+    if (!user) {
+      setTrades([]);
+      setLoading(false);
+      return;
+    }
+
+    const fetchTrades = async () => {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from("risk_trades")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("date", { ascending: false });
+
+      if (error) {
+        console.error("Error fetching trades:", error.message);
+        alert("Error fetching trades: " + error.message);
+        setTrades([]);
+      } else {
+        setTrades(data);
+      }
+      setLoading(false);
+    };
+
+    fetchTrades();
+  }, [user]);
 
   // Add new trade
-  const addTrade = (trade) => {
-    setTrades((prev) => [...prev, { id: Date.now(), ...trade }]);
+  const addTrade = async (trade) => {
+    if (!user) return;
+    const { error } = await supabase.from("risk_trades").insert([
+      {
+        user_id: user.id,
+        date: trade.date,
+        pair: trade.pair,
+        signal: trade.signal,
+        risk_pips: trade.riskPips ? Number(trade.riskPips) : 0,
+        risk_usd: trade.riskUSD ? Number(trade.riskUSD) : 0,
+        gain_pips: trade.gainPips ? Number(trade.gainPips) : 0,
+        gain_usd: trade.gainUSD ? Number(trade.gainUSD) : 0,
+      },
+    ]);
+
+    if (error) {
+      console.error("Error adding trade:", error.message);
+      alert("Error adding trade: " + error.message);
+    } else {
+      alert("Trade added successfully!");
+    }
+
+    refreshTrades();
   };
 
   // Update existing trade
-  const updateTrade = (updatedTrade) => {
-    setTrades((prev) =>
-      prev.map((t) => (t.id === editTrade.id ? { ...t, ...updatedTrade } : t))
-    );
+  const updateTrade = async (updatedTrade) => {
+    if (!editTrade) return;
+    const { error } = await supabase
+      .from("risk_trades")
+      .update({
+        date: updatedTrade.date,
+        pair: updatedTrade.pair,
+        signal: updatedTrade.signal,
+        risk_pips: updatedTrade.riskPips ? Number(updatedTrade.riskPips) : 0,
+        risk_usd: updatedTrade.riskUSD ? Number(updatedTrade.riskUSD) : 0,
+        gain_pips: updatedTrade.gainPips ? Number(updatedTrade.gainPips) : 0,
+        gain_usd: updatedTrade.gainUSD ? Number(updatedTrade.gainUSD) : 0,
+      })
+      .eq("id", editTrade.id)
+      .eq("user_id", user.id); // enforce ownership in client too
+
+    if (error) {
+      console.error("Error updating trade:", error.message);
+      alert("Error updating trade: " + error.message);
+    } else {
+      alert("Trade updated successfully!");
+    }
+
     setEditTrade(null);
+    refreshTrades();
   };
 
-  // Delete trade by id
-  const deleteTrade = (id) => {
-    if (window.confirm('Are you sure you want to delete this trade?')) {
-      setTrades((prev) => prev.filter((t) => t.id !== id));
+  // Delete trade
+  const deleteTrade = async (id) => {
+    if (window.confirm("Are you sure you want to delete this trade?")) {
+      const { error } = await supabase
+        .from("risk_trades")
+        .delete()
+        .eq("id", id)
+        .eq("user_id", user.id);
+
+      if (error) {
+        console.error("Error deleting trade:", error.message);
+        alert("Error deleting trade: " + error.message);
+      } else {
+        alert("Trade deleted successfully!");
+      }
+
+      refreshTrades();
     }
   };
 
-  // Open modal for editing trade
+  // Helper: refresh trades
+  const refreshTrades = async () => {
+    if (!user) return;
+    const { data, error } = await supabase
+      .from("risk_trades")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("date", { ascending: false });
+    if (!error) setTrades(data || []);
+  };
+
   const handleEdit = (trade) => {
     setEditTrade(trade);
     setModalOpen(true);
   };
 
-  // Close modal and reset edit state
   const handleCloseModal = () => {
     setModalOpen(false);
     setEditTrade(null);
@@ -72,97 +182,95 @@ function RiskManagement() {
         Add New Risk Trade
       </button>
 
-      <div className="overflow-x-auto">
-        <table className="min-w-full border border-gray-300 border-collapse text-sm">
-          <thead>
-            <tr className="bg-gray-100 text-left">
-              <th className="border border-gray-300 px-3 py-2">Date of Trade</th>
-              <th className="border border-gray-300 px-3 py-2">Day of Week</th>
-              <th className="border border-gray-300 px-3 py-2">Currency Pair</th>
-              <th className="border border-gray-300 px-3 py-2">Signal</th>
-              <th className="border border-gray-300 px-3 py-2">Risk (Pips)</th>
-              <th className="border border-gray-300 px-3 py-2">Risk (USD)</th>
-              <th className="border border-gray-300 px-3 py-2">Risk (TZS)</th>
-              <th className="border border-gray-300 px-3 py-2">Gain (Pips)</th>
-              <th className="border border-gray-300 px-3 py-2">Gain (USD)</th>
-              <th className="border border-gray-300 px-3 py-2">Gain (TZS)</th>
-              <th className="border border-gray-300 px-3 py-2">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {trades.length === 0 ? (
-              <tr>
-                <td colSpan={11} className="text-center p-4 text-gray-500">
-                  No trades available.
-                </td>
+      {loading ? (
+        <p className="text-center text-gray-500">Loading trades...</p>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="min-w-full border border-gray-300 border-collapse text-sm">
+            <thead>
+              <tr className="bg-gray-100 text-left">
+                <th className="border px-3 py-2">Date of Trade</th>
+                <th className="border px-3 py-2">Day of Week</th>
+                <th className="border px-3 py-2">Currency Pair</th>
+                <th className="border px-3 py-2">Signal</th>
+                <th className="border px-3 py-2">Risk (Pips)</th>
+                <th className="border px-3 py-2">Risk (USD)</th>
+                <th className="border px-3 py-2">Risk (TZS)</th>
+                <th className="border px-3 py-2">Gain (Pips)</th>
+                <th className="border px-3 py-2">Gain (USD)</th>
+                <th className="border px-3 py-2">Gain (TZS)</th>
+                <th className="border px-3 py-2">Actions</th>
               </tr>
-            ) : (
-              trades.map((trade) => {
-                const { date, day } = formatDateAndDay(trade.date);
-                const riskTZS = convertUSDToTSH(trade.riskUSD);
-                const gainTZS = convertUSDToTSH(trade.gainUSD);
+            </thead>
+            <tbody>
+              {trades.length === 0 ? (
+                <tr>
+                  <td colSpan={11} className="text-center p-4 text-gray-500">
+                    No trades available.
+                  </td>
+                </tr>
+              ) : (
+                trades.map((trade) => {
+                  const { date, day } = formatDateAndDay(trade.date);
+                  const riskTZS = trade.risk_usd
+                    ? convertUSDToTSH(trade.risk_usd)
+                    : 0;
+                  const gainTZS = trade.gain_usd
+                    ? convertUSDToTSH(trade.gain_usd)
+                    : 0;
 
-                return (
-                  <tr
-                    key={trade.id}
-                    className="hover:bg-gray-50 transition-colors duration-150"
-                  >
-                    <td className="border border-gray-300 px-3 py-2 whitespace-nowrap">
-                      {date}
-                    </td>
-                    <td className="border border-gray-300 px-3 py-2 whitespace-nowrap">
-                      {day}
-                    </td>
-                    <td className="border border-gray-300 px-3 py-2 whitespace-nowrap">
-                      {trade.pair}
-                    </td>
-                    <td className="border border-gray-300 px-3 py-2 whitespace-nowrap">
-                      {trade.signal}
-                    </td>
-                    <td className="border border-gray-300 px-3 py-2 whitespace-nowrap">
-                      {trade.riskPips}
-                    </td>
-                    <td className="border border-gray-300 px-3 py-2 whitespace-nowrap">
-                      ${trade.riskUSD.toFixed(2)}
-                    </td>
-                    <td className="border border-gray-300 px-3 py-2 whitespace-nowrap">
-                      {riskTZS.toFixed(0)} TZS
-                    </td>
-                    <td className="border border-gray-300 px-3 py-2 whitespace-nowrap">
-                      {trade.gainPips}
-                    </td>
-                    <td className="border border-gray-300 px-3 py-2 whitespace-nowrap">
-                      ${trade.gainUSD.toFixed(2)}
-                    </td>
-                    <td className="border border-gray-300 px-3 py-2 whitespace-nowrap">
-                      {gainTZS.toFixed(0)} TZS
-                    </td>
-                    <td className="border border-gray-300 px-3 py-2 whitespace-nowrap space-x-2">
-                      <button
-                        onClick={() => handleEdit(trade)}
-                        className="px-2 py-1 bg-yellow-400 text-white rounded hover:bg-yellow-500 transition"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => deleteTrade(trade.id)}
-                        className="px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition"
-                      >
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })
-            )}
-          </tbody>
-        </table>
-      </div>
+                  return (
+                    <tr
+                      key={trade.id}
+                      className="hover:bg-gray-50 transition-colors duration-150"
+                    >
+                      <td className="border px-3 py-2">{date}</td>
+                      <td className="border px-3 py-2">{day}</td>
+                      <td className="border px-3 py-2">{trade.pair}</td>
+                      <td className="border px-3 py-2">{trade.signal}</td>
+                      <td className="border px-3 py-2">
+                        {formatNumber(trade.risk_pips, 0)}
+                      </td>
+                      <td className="border px-3 py-2">
+                        ${formatNumber(trade.risk_usd)}
+                      </td>
+                      <td className="border px-3 py-2">
+                        {riskTZS ? `${riskTZS.toFixed(0)} TZS` : "-"}
+                      </td>
+                      <td className="border px-3 py-2">
+                        {formatNumber(trade.gain_pips, 0)}
+                      </td>
+                      <td className="border px-3 py-2">
+                        ${formatNumber(trade.gain_usd)}
+                      </td>
+                      <td className="border px-3 py-2">
+                        {gainTZS ? `${gainTZS.toFixed(0)} TZS` : "-"}
+                      </td>
+                      <td className="border px-3 py-2 space-x-2">
+                        <button
+                          onClick={() => handleEdit(trade)}
+                          className="px-2 py-1 bg-yellow-400 text-white rounded hover:bg-yellow-500 transition"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => deleteTrade(trade.id)}
+                          className="px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition"
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
 
-
-        {/* Charts Section */}
+      {/* Charts */}
       <RiskTradeCharts trades={trades} />
-
 
       {modalOpen && (
         <RiskTradeModal

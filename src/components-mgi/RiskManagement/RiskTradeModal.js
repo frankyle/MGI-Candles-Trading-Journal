@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 
 const accountBalanceUSD = 100;
 const usdToTshRate = 2500;
@@ -6,34 +6,44 @@ const convertUSDToTSH = (usd) => usd * usdToTshRate;
 
 function RiskTradeModal({ onClose, onSave, initialData }) {
   const [form, setForm] = useState({
-    date: '',
-    pair: '',
-    signal: 'BUY',
-    riskPips: '',
-    gainPips: '',
-    riskUSD: '',
-    gainUSD: '',
+    date: "",
+    pair: "",
+    signal: "BUY",
+    riskPips: "",
+    gainPips: "",
+    riskUSD: "",
+    gainUSD: "",
   });
 
   // Load initial data on mount (for editing)
   useEffect(() => {
     if (initialData) {
       setForm({
-        date: initialData.date || '',
-        pair: initialData.pair || '',
-        signal: initialData.signal || 'BUY',
-        riskPips: initialData.riskPips || '',
-        gainPips: initialData.gainPips || '',
-        riskUSD: initialData.riskUSD || '',
-        gainUSD: initialData.gainUSD || '',
+        date: initialData.date || "",
+        pair: initialData.pair || "",
+        signal: initialData.signal || "BUY",
+        riskPips:
+          initialData.risk_pips !== null ? initialData.risk_pips : "",
+        gainPips:
+          initialData.gain_pips !== null ? initialData.gain_pips : "",
+        riskUSD:
+          initialData.risk_usd !== null ? initialData.risk_usd : "",
+        gainUSD:
+          initialData.gain_usd !== null ? initialData.gain_usd : "",
       });
     }
   }, [initialData]);
 
+  // Helper to safely convert to number
+  const safeNumber = (val) => {
+    const num = parseFloat(val);
+    return isNaN(num) ? 0 : num;
+  };
+
   // Calculated fields
-  const riskPercent = form.riskUSD ? (parseFloat(form.riskUSD) / accountBalanceUSD) * 100 : 0;
-  const riskTZS = form.riskUSD ? convertUSDToTSH(parseFloat(form.riskUSD)) : 0;
-  const gainTZS = form.gainUSD ? convertUSDToTSH(parseFloat(form.gainUSD)) : 0;
+  const riskPercent = (safeNumber(form.riskUSD) / accountBalanceUSD) * 100;
+  const riskTZS = convertUSDToTSH(safeNumber(form.riskUSD));
+  const gainTZS = convertUSDToTSH(safeNumber(form.gainUSD));
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -42,6 +52,7 @@ function RiskTradeModal({ onClose, onSave, initialData }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
     // Validation
     if (
       !form.date ||
@@ -51,25 +62,31 @@ function RiskTradeModal({ onClose, onSave, initialData }) {
       !form.riskUSD ||
       !form.gainUSD
     ) {
-      alert('Please fill in all required fields');
+      alert("Please fill in all required fields");
       return;
     }
 
     onSave({
       ...form,
-      riskPips: parseFloat(form.riskPips),
-      gainPips: parseFloat(form.gainPips),
-      riskUSD: parseFloat(form.riskUSD),
-      gainUSD: parseFloat(form.gainUSD),
+      riskPips: safeNumber(form.riskPips),
+      gainPips: safeNumber(form.gainPips),
+      riskUSD: safeNumber(form.riskUSD),
+      gainUSD: safeNumber(form.gainUSD),
     });
+
     onClose();
   };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
       <div className="bg-white rounded-lg p-6 w-full max-w-md shadow-lg max-h-[90vh] overflow-auto">
-        <h2 className="text-xl font-semibold mb-6">{initialData ? 'Edit Risk Trade' : 'Add New Risk Trade'}</h2>
-        <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
+        <h2 className="text-xl font-semibold mb-6">
+          {initialData ? "Edit Risk Trade" : "Add New Risk Trade"}
+        </h2>
+        <form
+          onSubmit={handleSubmit}
+          className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4"
+        >
           {/* Date */}
           <div className="flex flex-col">
             <label className="block font-medium mb-1">Date of Trade</label>
@@ -155,8 +172,12 @@ function RiskTradeModal({ onClose, onSave, initialData }) {
               className="border border-gray-300 rounded px-3 py-2"
               required
             />
-            <p className="text-sm text-gray-600 mt-1">Risk % of Account: {riskPercent.toFixed(2)}%</p>
-            <p className="text-sm text-gray-600 mt-1">Risk (TZS): {riskTZS.toFixed(0)} TZS</p>
+            <p className="text-sm text-gray-600 mt-1">
+              Risk % of Account: {riskPercent.toFixed(2)}%
+            </p>
+            <p className="text-sm text-gray-600 mt-1">
+              Risk (TZS): {riskTZS.toFixed(0)} TZS
+            </p>
           </div>
 
           {/* Gain (USD) */}
@@ -173,10 +194,12 @@ function RiskTradeModal({ onClose, onSave, initialData }) {
               className="border border-gray-300 rounded px-3 py-2"
               required
             />
-            <p className="text-sm text-gray-600 mt-1">Gain (TZS): {gainTZS.toFixed(0)} TZS</p>
+            <p className="text-sm text-gray-600 mt-1">
+              Gain (TZS): {gainTZS.toFixed(0)} TZS
+            </p>
           </div>
 
-          {/* Buttons span full width on small screens */}
+          {/* Buttons */}
           <div className="sm:col-span-2 flex justify-end space-x-3 mt-4">
             <button
               type="button"
@@ -189,7 +212,7 @@ function RiskTradeModal({ onClose, onSave, initialData }) {
               type="submit"
               className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
             >
-              {initialData ? 'Save Changes' : 'Add Trade'}
+              {initialData ? "Save Changes" : "Add Trade"}
             </button>
           </div>
         </form>
