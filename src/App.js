@@ -11,6 +11,7 @@ import ContactUs from './components-mgi/Home/ContactUs';
 import Archive from './components-mgi/ArchiveForder/Archive';
 import SignIn from './components-mgi/Authentication/SignIn';
 import SignUp from './components-mgi/Authentication/SignUp';
+import TradeForm from './components-mgi/Admin/TradeForm';
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Homepage />} />
           <Route path="/trades" element={<TradingJournalForm />} />
+          <Route path="/trades_idea" element={<TradeForm />} />
           <Route path="/riskmanagement" element={<RiskManagement />} />
           <Route path="/riskmanagementfunded" element={<FundedAccount />} />
           {/* <Route path="/membership" element={<Membership />} /> */}

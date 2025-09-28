@@ -83,6 +83,7 @@ const Header = () => {
           <nav className="hidden md:flex space-x-6 items-center ml-12 relative">
             <NavLink to="/" label="Home" />
             <NavLink to="/trades" label="My Trades" />
+            <NavLink to="/trades_idea" label="Admin Trades" />
 
             {/* Progress Dropdown */}
             <div className="relative">
@@ -176,6 +177,13 @@ const Header = () => {
               label="My Trades"
               close={() => setMobileMenuOpen(false)}
             />
+
+           <NavLink
+              to="/trades_idea"
+              label="Admin Trades"
+              close={() => setMobileMenuOpen(false)}
+            />
+
 
             {/* Mobile Progress Dropdown */}
             <div className="space-y-1">
