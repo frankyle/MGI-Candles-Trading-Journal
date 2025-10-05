@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { supabase } from "../../supabaseClient"; // adjust path
 import RiskTradeModal from "./RiskTradeModal";
 import RiskTradeCharts from "./RiskTradeCharts";
+import { Navigate } from "react-router-dom"; // For redirect
 
 const usdToTshRate = 2500;
 const convertUSDToTSH = (usd) => usd * usdToTshRate;
@@ -32,19 +33,22 @@ function RiskManagement() {
   const [editTrade, setEditTrade] = useState(null);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
+  const [checkingUser, setCheckingUser] = useState(true);
 
-  // Fetch current user once
+  // Fetch current user
   useEffect(() => {
     const getUser = async () => {
       const {
         data: { user },
         error,
       } = await supabase.auth.getUser();
+
       if (error) {
         console.error("Error fetching user:", error.message);
-        alert("Error fetching user: " + error.message);
       }
+
       setUser(user);
+      setCheckingUser(false);
     };
     getUser();
   }, []);
@@ -67,7 +71,6 @@ function RiskManagement() {
 
       if (error) {
         console.error("Error fetching trades:", error.message);
-        alert("Error fetching trades: " + error.message);
         setTrades([]);
       } else {
         setTrades(data);
@@ -106,7 +109,7 @@ function RiskManagement() {
 
   // Update existing trade
   const updateTrade = async (updatedTrade) => {
-    if (!editTrade) return;
+    if (!editTrade || !user) return;
     const { error } = await supabase
       .from("risk_trades")
       .update({
@@ -119,7 +122,7 @@ function RiskManagement() {
         gain_usd: updatedTrade.gainUSD ? Number(updatedTrade.gainUSD) : 0,
       })
       .eq("id", editTrade.id)
-      .eq("user_id", user.id); // enforce ownership in client too
+      .eq("user_id", user.id);
 
     if (error) {
       console.error("Error updating trade:", error.message);
@@ -134,25 +137,26 @@ function RiskManagement() {
 
   // Delete trade
   const deleteTrade = async (id) => {
-    if (window.confirm("Are you sure you want to delete this trade?")) {
-      const { error } = await supabase
-        .from("risk_trades")
-        .delete()
-        .eq("id", id)
-        .eq("user_id", user.id);
+    if (!user) return;
+    if (!window.confirm("Are you sure you want to delete this trade?")) return;
 
-      if (error) {
-        console.error("Error deleting trade:", error.message);
-        alert("Error deleting trade: " + error.message);
-      } else {
-        alert("Trade deleted successfully!");
-      }
+    const { error } = await supabase
+      .from("risk_trades")
+      .delete()
+      .eq("id", id)
+      .eq("user_id", user.id);
 
-      refreshTrades();
+    if (error) {
+      console.error("Error deleting trade:", error.message);
+      alert("Error deleting trade: " + error.message);
+    } else {
+      alert("Trade deleted successfully!");
     }
+
+    refreshTrades();
   };
 
-  // Helper: refresh trades
+  // Refresh trades
   const refreshTrades = async () => {
     if (!user) return;
     const { data, error } = await supabase
@@ -172,6 +176,15 @@ function RiskManagement() {
     setModalOpen(false);
     setEditTrade(null);
   };
+
+  // 🔒 Redirect if user not logged in
+  if (checkingUser) {
+    return <p className="text-center mt-10 text-gray-500">Checking session...</p>;
+  }
+
+  if (!user) {
+    return <Navigate to="/signin" replace />;
+  }
 
   return (
     <div className="p-6 max-w-6xl mx-auto">
