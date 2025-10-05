@@ -3,12 +3,15 @@ import { supabase } from "../../supabaseClient";
 
 export default function TradeForm() {
   const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [images, setImages] = useState([null, null, null]);
+  const [signal, setSignal] = useState("BUY");
+  const [tradeDate, setTradeDate] = useState("");
+  const [dlDhTime, setDlDhTime] = useState("");
+  const [images, setImages] = useState([null, null, null]); // new files
+  const [existingImages, setExistingImages] = useState([null, null, null]); // existing URLs
   const [trades, setTrades] = useState([]);
-  const [editingId, setEditingId] = useState(null); // track editing trade
+  const [editingId, setEditingId] = useState(null);
 
-  // Fetch trades for the current user
+  // Fetch user trades
   const fetchTrades = async () => {
     const session = (await supabase.auth.getSession())?.data?.session;
     if (!session) return;
@@ -34,7 +37,7 @@ export default function TradeForm() {
     setImages(newImages);
   };
 
-  // Submit new trade or update existing one
+  // Save or update trade
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -45,76 +48,68 @@ export default function TradeForm() {
     }
 
     const userId = session.user.id;
-    let uploadedUrls = [];
+    let finalImageUrls = [...existingImages]; // Start with old images
 
     try {
-      // Upload images
+      // Upload only the new images
       for (let i = 0; i < images.length; i++) {
         if (images[i]) {
           const filePath = `${userId}/${Date.now()}_${i}.jpg`;
 
           const { error: uploadError } = await supabase.storage
             .from("trades")
-            .upload(filePath, images[i]);
+            .upload(filePath, images[i], { upsert: true });
 
           if (uploadError) {
-            console.error("Upload error:", uploadError);
             alert(`Image upload failed: ${uploadError.message}`);
             return;
           }
 
-          const { data: urlData, error: urlError } = supabase.storage
+          const { data: urlData } = supabase.storage
             .from("trades")
             .getPublicUrl(filePath);
 
-          if (urlError) {
-            console.error("Get URL error:", urlError);
-            alert(`Could not get public URL: ${urlError.message}`);
-            return;
-          }
-
-          uploadedUrls.push(urlData.publicUrl);
-        } else {
-          uploadedUrls.push(null);
+          finalImageUrls[i] = urlData.publicUrl; // Replace with new one
         }
       }
 
       if (editingId) {
-        // 🔹 Update existing trade
+        // Update trade
         const { error: updateError } = await supabase
           .from("trades")
           .update({
             title,
-            description,
-            image1: uploadedUrls[0],
-            image2: uploadedUrls[1],
-            image3: uploadedUrls[2],
+            signal,
+            trade_date: tradeDate,
+            dl_dh_time: dlDhTime,
+            image1: finalImageUrls[0],
+            image2: finalImageUrls[1],
+            image3: finalImageUrls[2],
           })
           .eq("id", editingId);
 
         if (updateError) {
-          console.error("Update error:", updateError);
           alert(`Update failed: ${updateError.message}`);
           return;
         }
 
         alert("Trade updated successfully!");
-        setEditingId(null);
       } else {
-        // 🔹 Insert new trade
+        // Insert new trade
         const { error: insertError } = await supabase.from("trades").insert([
           {
             user_id: userId,
             title,
-            description,
-            image1: uploadedUrls[0],
-            image2: uploadedUrls[1],
-            image3: uploadedUrls[2],
+            signal,
+            trade_date: tradeDate,
+            dl_dh_time: dlDhTime,
+            image1: finalImageUrls[0],
+            image2: finalImageUrls[1],
+            image3: finalImageUrls[2],
           },
         ]);
 
         if (insertError) {
-          console.error("Insert error:", insertError);
           alert(`Insert failed: ${insertError.message}`);
           return;
         }
@@ -123,14 +118,22 @@ export default function TradeForm() {
       }
 
       // Reset form
-      setTitle("");
-      setDescription("");
-      setImages([null, null, null]);
+      resetForm();
       fetchTrades();
     } catch (err) {
       console.error("Unexpected error:", err);
       alert(`Unexpected error: ${err.message}`);
     }
+  };
+
+  const resetForm = () => {
+    setEditingId(null);
+    setTitle("");
+    setSignal("BUY");
+    setTradeDate("");
+    setDlDhTime("");
+    setImages([null, null, null]);
+    setExistingImages([null, null, null]);
   };
 
   // Delete trade
@@ -139,7 +142,6 @@ export default function TradeForm() {
 
     const { error } = await supabase.from("trades").delete().eq("id", id);
     if (error) {
-      console.error("Delete error:", error);
       alert(`Delete failed: ${error.message}`);
     } else {
       alert("Trade deleted successfully!");
@@ -151,8 +153,11 @@ export default function TradeForm() {
   const handleEdit = (trade) => {
     setEditingId(trade.id);
     setTitle(trade.title);
-    setDescription(trade.description);
-    setImages([null, null, null]); // keep images empty unless re-uploaded
+    setSignal(trade.signal);
+    setTradeDate(trade.trade_date);
+    setDlDhTime(trade.dl_dh_time);
+    setExistingImages([trade.image1, trade.image2, trade.image3]);
+    setImages([null, null, null]);
   };
 
   return (
@@ -161,44 +166,72 @@ export default function TradeForm() {
       <h2 className="text-xl font-bold mb-4 text-center">
         {editingId ? "Edit Trade" : "Add Trade"}
       </h2>
+
       <form onSubmit={handleSubmit} className="flex flex-col gap-3 mb-6">
         <input
           type="text"
-          placeholder="Title"
+          placeholder="Currency"
           className="border p-2 rounded"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           required
         />
-        <textarea
-          placeholder="Description"
+
+        <select
           className="border p-2 rounded"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
+          value={signal}
+          onChange={(e) => setSignal(e.target.value)}
+          required
+        >
+          <option value="BUY">BUY</option>
+          <option value="SELL">SELL</option>
+        </select>
+
+        <input
+          type="date"
+          className="border p-2 rounded"
+          value={tradeDate}
+          onChange={(e) => setTradeDate(e.target.value)}
+          required
         />
+
+        <input
+          type="time"
+          className="border p-2 rounded"
+          value={dlDhTime}
+          onChange={(e) => setDlDhTime(e.target.value)}
+          required
+        />
+
+        {/* File inputs and existing image previews */}
         {[0, 1, 2].map((i) => (
-          <input
-            key={i}
-            type="file"
-            accept="image/*"
-            onChange={(e) => handleFileChange(i, e.target.files[0])}
-          />
+          <div key={i} className="flex flex-col gap-1">
+            {existingImages[i] && (
+              <img
+                src={existingImages[i]}
+                alt={`Existing Trade ${i}`}
+                className="w-24 h-24 object-cover rounded"
+              />
+            )}
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => handleFileChange(i, e.target.files[0])}
+            />
+          </div>
         ))}
+
         <button
           type="submit"
           className="bg-green-500 text-white py-2 rounded hover:bg-green-600"
         >
           {editingId ? "Update Trade" : "Save Trade"}
         </button>
+
         {editingId && (
           <button
             type="button"
-            onClick={() => {
-              setEditingId(null);
-              setTitle("");
-              setDescription("");
-              setImages([null, null, null]);
-            }}
+            onClick={resetForm}
             className="bg-gray-500 text-white py-2 rounded hover:bg-gray-600"
           >
             Cancel Edit
@@ -206,7 +239,7 @@ export default function TradeForm() {
         )}
       </form>
 
-      {/* List of Trades */}
+      {/* Trade List */}
       <h2 className="text-xl font-bold mb-4 text-center">Your Trades</h2>
       {trades.length === 0 ? (
         <p className="text-center text-gray-500">No trades yet.</p>
@@ -215,23 +248,34 @@ export default function TradeForm() {
           {trades.map((trade) => (
             <div key={trade.id} className="border p-3 rounded shadow-sm">
               <h3 className="font-bold text-lg mb-1">{trade.title}</h3>
-              <p className="mb-2">{trade.description}</p>
-              <div className="flex gap-2">
+              <p>
+                <strong>Signal:</strong> {trade.signal}
+              </p>
+              <p>
+                <strong>Date of Trade:</strong> {trade.trade_date}
+              </p>
+              <p>
+                <strong>DL/DH Time:</strong> {trade.dl_dh_time}
+              </p>
+
+              <div className="flex gap-2 mt-2">
                 {[trade.image1, trade.image2, trade.image3].map(
                   (img, idx) =>
                     img && (
                       <img
                         key={idx}
                         src={img}
-                        alt={`Trade ${trade.title} ${idx}`}
+                        alt={`Trade ${idx}`}
                         className="w-24 h-24 object-cover rounded"
                       />
                     )
                 )}
               </div>
+
               <p className="text-gray-400 text-sm mt-1">
                 {new Date(trade.created_at).toLocaleString()}
               </p>
+
               <div className="flex gap-2 mt-2">
                 <button
                   onClick={() => handleEdit(trade)}
