@@ -39,13 +39,13 @@ const nySessionChecklist = [
   },
   {
     step: "Step 6: Breaker Block (Mandatory)",
-    checks: ["Breaker Block (Green for Buys / Red for Sells in 15min)"],
+    checks: ["Breaker Block (Green for Buys / Red for Sells in 15min/5min)"],
     mandatory: true,
   },
   {
     step: "Step 7: NewYork Continuation / Distribution (Mandatory)",
     checks: ["NY Continuation / Distribution"],
-    mandatory: true,
+    mandatory: false,
   },
   {
     step: "Step 8: Daily Open (Optional)",
@@ -151,7 +151,7 @@ const JournalChecklist = ({ entryId }) => {
     );
 
     if (!allMandatoryCompleted) {
-      setFinalDecision("❌ Not all mandatory steps completed (1–7 required).");
+      setFinalDecision("❌ Not all mandatory steps completed (1–6 required).");
       return;
     }
 
