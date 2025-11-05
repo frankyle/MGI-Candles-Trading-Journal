@@ -93,43 +93,65 @@ const TradeForm = ({
       {/* Image Upload Fields */}
       <div>
         <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-3">
-          Upload Trade Images
+          Upload Trade Documentation
         </h3>
+
         <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
+
           <ImageUploadField
-            label="Setup"
-            value={form.setupImage}
-            onChange={(e) => onImageChange(e, "setupImage")}
-          />
-          <ImageUploadField
-            label="Entry"
-            value={form.entryImage}
-            onChange={(e) => onImageChange(e, "entryImage")}
-          />
-          <ImageUploadField
-            label="Profit"
-            value={form.profitImage}
-            onChange={(e) => onImageChange(e, "profitImage")}
-          />
-          <ImageUploadField
-            label="Trader Idea One(1)"
+            label="(1) External Trader Idea (Optional)"
+            tooltip="Another trader’s idea used for influence or bias validation"
             value={form.traderIdeaMorning}
-            onChange={(e) => onImageChange(e, "traderIdeaMorning")}
+            onChange={(e) => onImageChange(e, 'traderIdeaMorning')}
+            description="Optional external idea"
           />
-          <ImageUploadField
-            label="Trader Idea Two(2)"
-            value={form.traderIdeaNoon}
-            onChange={(e) => onImageChange(e, "traderIdeaNoon")}
-          />
-          <ImageUploadField
-            label="Trader Idea Three(3)"
+
+
+         <ImageUploadField
+            label="(2) Daily Chart - Daily Candle Price Action"
+            tooltip="Daily narrative context using macro ICT model"
             value={form.traderIdeaEvening}
-            onChange={(e) => onImageChange(e, "traderIdeaEvening")}
+            onChange={(e) => onImageChange(e, 'traderIdeaEvening')}
+            description="Higher timeframe narrative"
           />
+          
+          <ImageUploadField
+            label="(3) MGI Strategy (1H Chart - Unbroken NYC Levels + ICT Concept)"
+            tooltip="NY Session expectation based on unbroken liquidity levels & ICT Kill Zone"
+            value={form.traderIdeaNoon}
+            onChange={(e) => onImageChange(e, 'traderIdeaNoon')}
+            description="NY Session directional thesis"
+          />
+
+
+          <ImageUploadField
+            label="(4) Trading Setup (2H Chart - DHDL Movement + ICT Killzone)"
+            tooltip="Show Higher Timeframe Bias • DHDL Structure • ICT Kill Zone"
+            value={form.setupImage}
+            onChange={(e) => onImageChange(e, 'setupImage')}
+            description="2H Bias + DHDL movement + Kill Zone"
+          />
+
+          <ImageUploadField
+            label="(5) Entry Execution (15m Chart Entry - ICT conept + ICT killzone)"
+            tooltip="Liquidity Grab → Displacement → Entry inside Kill Zone using FVG/OB"
+            value={form.entryImage}
+            onChange={(e) => onImageChange(e, 'entryImage')}
+            description="15m entry using FVG, OB or BB"
+          />
+
+          <ImageUploadField
+            label="(6) Profit Result (1H Chart - DHDL Movement + ICT Killzone)"
+            tooltip="Show how price reached target objective using DHDL draw & Kill Zone timing"
+            value={form.profitImage}
+            onChange={(e) => onImageChange(e, 'profitImage')}
+            description="1H draw objective achieved"
+          />
+
         </div>
       </div>
 
-      {/* Submit Button */}
+      {/* Submit */}
       <motion.button
         whileHover={{ scale: 1.03 }}
         whileTap={{ scale: 0.97 }}
@@ -139,7 +161,7 @@ const TradeForm = ({
         {editIndex !== null ? "Update Trade" : "Save Trade"}
       </motion.button>
 
-      {/* Trading Psychology Checklist */}
+      {/* Psychology Checklist */}
       <div className="mt-6">
         <TradingPsychologyChecklist />
       </div>
