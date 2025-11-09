@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import { supabase } from "../supabaseClient";
 import TradeForm from "./TradeForm";
+import JournalEntryList from "./journal/JournalEntryList";
 
 const TradePage = () => {
   const [form, setForm] = useState({
+    id: null,
     pair: "",
     type: "Buy",
     date: "",
@@ -18,66 +20,71 @@ const TradePage = () => {
     notes: "",
   });
 
+  const [editIndex, setEditIndex] = useState(null);
+
+  // ✅ Handle form text inputs
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
+  // ✅ Handle image upload input
   const handleImageChange = (e, field) => {
-    setForm({ ...form, [field]: e.target.value });
+    const file = e.target.files ? e.target.files[0] : null;
+    setForm((prev) => ({ ...prev, [field]: file }));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  // ✅ Reset form after save/update
+  const handleSaveComplete = () => {
+    setEditIndex(null);
+    setForm({
+      id: null,
+      pair: "",
+      type: "Buy",
+      date: "",
+      time: "",
+      session: "",
+      setupImage: "",
+      entryImage: "",
+      profitImage: "",
+      traderIdeaMorning: "",
+      traderIdeaNoon: "",
+      traderIdeaEvening: "",
+      notes: "",
+    });
+  };
 
-    console.log("📤 Submitting form:", form); // 👈 log before insert
-
-    const { data, error } = await supabase.from("trades").insert([
-      {
-        pair: form.pair,
-        type: form.type,
-        trade_date: form.date, // must match DB column
-        trade_time: form.time,
-        session: form.session,
-        setup_image: form.setupImage,
-        entry_image: form.entryImage,
-        profit_image: form.profitImage,
-        trader_idea_morning: form.traderIdeaMorning,
-        trader_idea_noon: form.traderIdeaNoon,
-        trader_idea_evening: form.traderIdeaEvening,
-        notes: form.notes,
-      },
-    ]);
-
-    if (error) {
-      console.error("❌ Supabase insert error:", error);
-      alert("Insert failed: " + error.message);
-    } else {
-      console.log("✅ Saved to Supabase:", data);
-      alert("Trade saved successfully!");
-      setForm({
-        pair: "",
-        type: "Buy",
-        date: "",
-        time: "",
-        session: "",
-        setupImage: "",
-        entryImage: "",
-        profitImage: "",
-        traderIdeaMorning: "",
-        traderIdeaNoon: "",
-        traderIdeaEvening: "",
-        notes: "",
-      });
-    }
+  // ✅ Populate form when editing an existing trade
+  const handleEdit = (entry) => {
+    setForm({
+      id: entry.id,
+      pair: entry.pair,
+      type: entry.type,
+      date: entry.date,
+      time: entry.time,
+      session: entry.session,
+      setupImage: entry.setup_image,
+      entryImage: entry.entry_image,
+      profitImage: entry.profit_image,
+      traderIdeaMorning: entry.trader_idea_morning,
+      traderIdeaNoon: entry.trader_idea_noon,
+      traderIdeaEvening: entry.trader_idea_evening,
+      notes: entry.notes || "",
+    });
+    setEditIndex(entry.id);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   return (
-    <TradeForm
-      form={form}
-      onChange={handleChange}
-      onSubmit={handleSubmit}
-      onImageChange={handleImageChange}
-    />
+    <div className="space-y-12 py-8 px-4 sm:px-8 max-w-6xl mx-auto">
+      <TradeForm
+        form={form}
+        onChange={handleChange}
+        onImageChange={handleImageChange}
+        onSaveComplete={handleSaveComplete}
+        editIndex={editIndex}
+      />
+      <JournalEntryList onEdit={handleEdit} />
+    </div>
   );
 };
 
