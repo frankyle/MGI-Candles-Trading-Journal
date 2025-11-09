@@ -1,33 +1,56 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { motion } from "framer-motion";
 import { ArrowUpDown } from "lucide-react";
 import JournalEntryCard from "./JournalEntryCard";
+import { supabase } from "../../supabaseClient";
 
-const JournalEntryList = ({ journal, onEdit, onDelete, onArchive }) => {
+const JournalEntryList = ({ onEdit }) => {
+  const [journal, setJournal] = useState([]);
   const [sortOption, setSortOption] = useState("date-desc");
-  const [visibleIdeas, setVisibleIdeas] = useState({});
 
-  const toggleIdeaVisibility = (index) => {
-    setVisibleIdeas((prev) => ({
-      ...prev,
-      [index]: !prev[index],
-    }));
+  // ✅ Fetch trades from Supabase
+  useEffect(() => {
+    const fetchTrades = async () => {
+      const { data, error } = await supabase.from("trades").select("*").order("date", { ascending: false });
+      if (error) {
+        console.error("❌ Error loading trades:", error.message);
+      } else {
+        setJournal(data);
+      }
+    };
+    fetchTrades();
+  }, []);
+
+  // ✅ Delete trade (from Supabase)
+  const handleDelete = async (index) => {
+    const entry = journal[index];
+    if (!entry?.id) return alert("Missing trade ID");
+
+    const confirmDelete = window.confirm(`Delete trade for ${entry.pair}?`);
+    if (!confirmDelete) return;
+
+    const { error } = await supabase.from("trades").delete().eq("id", entry.id);
+    if (error) return alert("❌ Failed to delete: " + error.message);
+
+    setJournal((prev) => prev.filter((_, i) => i !== index));
+    alert("✅ Trade deleted successfully");
   };
 
+  // ✅ Archive (local backup)
+  const handleArchive = (index) => {
+    const entry = journal[index];
+    const archived = JSON.parse(localStorage.getItem("archivedJournalEntries")) || [];
+    localStorage.setItem("archivedJournalEntries", JSON.stringify([...archived, entry]));
+    handleDelete(index);
+  };
+
+  // ✅ Sort logic
   const sortedJournal = useMemo(() => {
     const entries = [...journal];
-    if (sortOption === "pair-asc")
-      return entries.sort((a, b) => a.pair.localeCompare(b.pair));
-    if (sortOption === "pair-desc")
-      return entries.sort((a, b) => b.pair.localeCompare(a.pair));
-    if (sortOption === "date-asc")
-      return entries.sort(
-        (a, b) => new Date(a.date) - new Date(b.date)
-      );
-    if (sortOption === "date-desc")
-      return entries.sort(
-        (a, b) => new Date(b.date) - new Date(a.date)
-      );
+    if (sortOption === "pair-asc") return entries.sort((a, b) => a.pair.localeCompare(b.pair));
+    if (sortOption === "pair-desc") return entries.sort((a, b) => b.pair.localeCompare(a.pair));
+    if (sortOption === "date-asc") return entries.sort((a, b) => new Date(a.date) - new Date(b.date));
+    if (sortOption === "date-desc") return entries.sort((a, b) => new Date(b.date) - new Date(a.date));
     return entries;
   }, [journal, sortOption]);
 
@@ -56,18 +79,14 @@ const JournalEntryList = ({ journal, onEdit, onDelete, onArchive }) => {
 
       {/* Journal Entries */}
       {sortedJournal.length === 0 ? (
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="text-gray-500 dark:text-gray-400 text-center"
-        >
+        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-gray-500 dark:text-gray-400 text-center">
           No journal entries yet.
         </motion.p>
       ) : (
         <div className="space-y-6">
           {sortedJournal.map((entry, index) => (
             <motion.div
-              key={index}
+              key={entry.id || index}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.05 }}
@@ -75,11 +94,9 @@ const JournalEntryList = ({ journal, onEdit, onDelete, onArchive }) => {
               <JournalEntryCard
                 entry={entry}
                 index={index}
-                onEdit={onEdit}
-                onDelete={onDelete}
-                onArchive={onArchive}
-                visibleIdeas={visibleIdeas}
-                toggleIdeaVisibility={toggleIdeaVisibility}
+                onEdit={() => onEdit(entry)} 
+                onDelete={handleDelete}
+                onArchive={handleArchive}
               />
             </motion.div>
           ))}
